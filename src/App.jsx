@@ -1,0 +1,1049 @@
+import { useState, useEffect } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+
+// ── VOCAB — Lessons 1–20 ───────────────────────────────────────────────────
+const VOCAB = [
+  { lesson: 1, hanzi: "好", pinyin: "hǎo", english: "good; well" },
+  { lesson: 1, hanzi: "叫", pinyin: "jiào", english: "to be called; to call" },
+  { lesson: 1, hanzi: "名字", pinyin: "míng zi", english: "name" },
+  { lesson: 1, hanzi: "你", pinyin: "nǐ", english: "you (informal)" },
+  { lesson: 1, hanzi: "什么", pinyin: "shén me", english: "what?" },
+  { lesson: 1, hanzi: "我", pinyin: "wǒ", english: "I; me" },
+  { lesson: 1, hanzi: "姓", pinyin: "xìng", english: "surname; family name" },
+  { lesson: 2, hanzi: "汉语", pinyin: "hàn yǔ", english: "Chinese language" },
+  { lesson: 2, hanzi: "他", pinyin: "tā", english: "he; him" },
+  { lesson: 2, hanzi: "她", pinyin: "tā", english: "she; her" },
+  { lesson: 2, hanzi: "谢谢", pinyin: "xiè xie", english: "thank you" },
+  { lesson: 2, hanzi: "学生", pinyin: "xué sheng", english: "student" },
+  { lesson: 2, hanzi: "学习", pinyin: "xué xí", english: "to study; to learn" },
+  { lesson: 2, hanzi: "学校", pinyin: "xué xiào", english: "school" },
+  { lesson: 2, hanzi: "中文", pinyin: "zhōng wén", english: "Chinese (written language)" },
+  { lesson: 3, hanzi: "高兴", pinyin: "gāo xìng", english: "happy; glad" },
+  { lesson: 3, hanzi: "很", pinyin: "hěn", english: "very; quite" },
+  { lesson: 3, hanzi: "哪", pinyin: "nǎ", english: "which?" },
+  { lesson: 3, hanzi: "那", pinyin: "nà", english: "that; those" },
+  { lesson: 3, hanzi: "人", pinyin: "rén", english: "person; people" },
+  { lesson: 3, hanzi: "认识", pinyin: "rèn shi", english: "to know; to recognize" },
+  { lesson: 3, hanzi: "谁", pinyin: "shéi", english: "who?" },
+  { lesson: 3, hanzi: "是", pinyin: "shì", english: "to be; yes" },
+  { lesson: 3, hanzi: "这", pinyin: "zhè", english: "this; these" },
+  { lesson: 3, hanzi: "中国", pinyin: "zhōng guó", english: "China" },
+  { lesson: 3, hanzi: "中国人", pinyin: "Zhōngguó rén", english: "Chinese person" },
+  { lesson: 3, hanzi: "法国人", pinyin: "Fǎguó rén", english: "French person" },
+  { lesson: 3, hanzi: "日本人", pinyin: "Rìběn rén", english: "Japanese person" },
+  { lesson: 3, hanzi: "韩国人", pinyin: "Hánguó rén", english: "Korean person" },
+  { lesson: 3, hanzi: "菲律宾人", pinyin: "Fēilǜbīn rén", english: "Filipino" },
+  { lesson: 3, hanzi: "法国", pinyin: "Fǎguó", english: "France" },
+  { lesson: 3, hanzi: "哪国人", pinyin: "nǎ guó rén", english: "what nationality?" },
+  { lesson: 3, hanzi: "您", pinyin: "nín", english: "you (polite)" },
+  { lesson: 3, hanzi: "也", pinyin: "yě", english: "also; too; as well" },
+  { lesson: 4, hanzi: "美国人", pinyin: "Měiguó rén", english: "American person" },
+  { lesson: 4, hanzi: "美国", pinyin: "Měiguó", english: "America" },
+  { lesson: 4, hanzi: "德国人", pinyin: "Déguó rén", english: "German person" },
+  { lesson: 4, hanzi: "德国", pinyin: "Déguó", english: "Germany" },
+  { lesson: 4, hanzi: "西班牙人", pinyin: "Xībānyá rén", english: "Spanish person" },
+  { lesson: 4, hanzi: "西班牙", pinyin: "Xībānyá", english: "Spain" },
+  { lesson: 5, hanzi: "不", pinyin: "bù", english: "not; no" },
+  { lesson: 5, hanzi: "的", pinyin: "de", english: "structural particle (of)" },
+  { lesson: 5, hanzi: "对不起", pinyin: "duì bu qǐ", english: "I'm sorry; excuse me" },
+  { lesson: 5, hanzi: "吗", pinyin: "ma", english: "(question particle)" },
+  { lesson: 5, hanzi: "没关系", pinyin: "méi guān xi", english: "it doesn't matter; never mind" },
+  { lesson: 5, hanzi: "请", pinyin: "qǐng", english: "please; to invite" },
+  { lesson: 5, hanzi: "先生", pinyin: "xiān sheng", english: "Mr.; sir" },
+  { lesson: 5, hanzi: "再见", pinyin: "zài jiàn", english: "goodbye" },
+  { lesson: 5, hanzi: "快递", pinyin: "kuàidì", english: "express mail" },
+  { lesson: 5, hanzi: "邮递员", pinyin: "yóudìyuán", english: "mailman" },
+  { lesson: 5, hanzi: "请问", pinyin: "qǐngwèn", english: "may I ask / excuse me" },
+  { lesson: 6, hanzi: "老师", pinyin: "lǎo shī", english: "teacher" },
+  { lesson: 6, hanzi: "小姐", pinyin: "xiǎo jie", english: "Miss; young lady" },
+  { lesson: 6, hanzi: "医生", pinyin: "yī shēng", english: "doctor; physician" },
+  { lesson: 6, hanzi: "女士", pinyin: "nǚshì", english: "Ms. / Lady" },
+  { lesson: 6, hanzi: "大夫", pinyin: "dàifu", english: "doctor; medical practitioner" },
+  { lesson: 6, hanzi: "经理", pinyin: "jīng lǐ", english: "manager; director" },
+  { lesson: 7, hanzi: "工作", pinyin: "gōng zuò", english: "work; job" },
+  { lesson: 7, hanzi: "家", pinyin: "jiā", english: "home; family" },
+  { lesson: 7, hanzi: "做", pinyin: "zuò", english: "to do; to make" },
+  { lesson: 7, hanzi: "非常", pinyin: "fēi cháng", english: "very; extremely" },
+  { lesson: 7, hanzi: "忙", pinyin: "máng", english: "busy" },
+  { lesson: 7, hanzi: "最", pinyin: "zuì", english: "most; -est (superlative)" },
+  { lesson: 7, hanzi: "司机", pinyin: "sī jī", english: "driver; chauffeur" },
+  { lesson: 8, hanzi: "秘书", pinyin: "mìshū", english: "secretary" },
+  { lesson: 8, hanzi: "厨师", pinyin: "chúshī", english: "chef" },
+  { lesson: 8, hanzi: "运动员", pinyin: "yùndòngyuán", english: "athlete" },
+  { lesson: 8, hanzi: "记者", pinyin: "jìzhě", english: "reporter; journalist" },
+  { lesson: 8, hanzi: "家庭主妇", pinyin: "jiātíng zhǔfù", english: "housewife" },
+  { lesson: 8, hanzi: "家庭", pinyin: "jiātíng", english: "family; household" },
+  { lesson: 8, hanzi: "主妇", pinyin: "zhǔfù", english: "housewife; hostess" },
+  { lesson: 8, hanzi: "服务", pinyin: "fúwù", english: "service; to serve" },
+  { lesson: 8, hanzi: "律师", pinyin: "lǜshī", english: "lawyer" },
+  { lesson: 8, hanzi: "辛苦", pinyin: "xīnkǔ", english: "hard; laborious" },
+  { lesson: 8, hanzi: "服务员", pinyin: "fú wù yuán", english: "waiter; attendant" },
+  { lesson: 8, hanzi: "快乐", pinyin: "kuài lè", english: "happy; merry" },
+  { lesson: 8, hanzi: "累", pinyin: "lèi", english: "tired; weary" },
+  { lesson: 8, hanzi: "运动", pinyin: "yùn dòng", english: "exercise; sport" },
+  { lesson: 9, hanzi: "吃", pinyin: "chī", english: "to eat" },
+  { lesson: 9, hanzi: "都", pinyin: "dōu", english: "all; both; entirely" },
+  { lesson: 9, hanzi: "呢", pinyin: "ne", english: "(question particle)" },
+  { lesson: 9, hanzi: "睡觉", pinyin: "shuì jiào", english: "to sleep; to go to bed" },
+  { lesson: 9, hanzi: "喜欢", pinyin: "xǐ huan", english: "to like; to be fond of" },
+  { lesson: 9, hanzi: "唱歌", pinyin: "chàng gē", english: "to sing a song" },
+  { lesson: 9, hanzi: "打篮球", pinyin: "dǎ lán qiú", english: "to play basketball" },
+  { lesson: 9, hanzi: "踢足球", pinyin: "tī zú qiú", english: "to play soccer" },
+  { lesson: 9, hanzi: "打", pinyin: "dǎ", english: "to play (sports)" },
+  { lesson: 9, hanzi: "篮球", pinyin: "lán qiú", english: "basketball" },
+  { lesson: 9, hanzi: "上网", pinyin: "shàng wǎng", english: "to go online; surf the Internet" },
+  { lesson: 10, hanzi: "本", pinyin: "běn", english: "(classifier for books)" },
+  { lesson: 10, hanzi: "茶", pinyin: "chá", english: "tea" },
+  { lesson: 10, hanzi: "电视", pinyin: "diàn shì", english: "television; TV" },
+  { lesson: 10, hanzi: "电影", pinyin: "diàn yǐng", english: "movie; film" },
+  { lesson: 10, hanzi: "读", pinyin: "dú", english: "to read; to study" },
+  { lesson: 10, hanzi: "喝", pinyin: "hē", english: "to drink" },
+  { lesson: 10, hanzi: "看", pinyin: "kàn", english: "to look at; to watch" },
+  { lesson: 10, hanzi: "看见", pinyin: "kàn jiàn", english: "to see; to catch sight of" },
+  { lesson: 10, hanzi: "书", pinyin: "shū", english: "book" },
+  { lesson: 10, hanzi: "听", pinyin: "tīng", english: "to listen; to hear" },
+  { lesson: 10, hanzi: "写", pinyin: "xiě", english: "to write" },
+  { lesson: 10, hanzi: "报纸", pinyin: "bào zhǐ", english: "newspaper" },
+  { lesson: 10, hanzi: "音乐", pinyin: "yīn yuè", english: "music" },
+  { lesson: 11, hanzi: "爸爸", pinyin: "bà ba", english: "father" },
+  { lesson: 11, hanzi: "多", pinyin: "duō", english: "many; much; a lot" },
+  { lesson: 11, hanzi: "个", pinyin: "gè", english: "(general classifier)" },
+  { lesson: 11, hanzi: "妈妈", pinyin: "mā ma", english: "mother; mom" },
+  { lesson: 11, hanzi: "没有", pinyin: "méi yǒu", english: "don't have; there is not" },
+  { lesson: 11, hanzi: "漂亮", pinyin: "piào liang", english: "pretty; beautiful" },
+  { lesson: 11, hanzi: "衣服", pinyin: "yī fu", english: "clothes; clothing" },
+  { lesson: 11, hanzi: "有", pinyin: "yǒu", english: "to have; there is" },
+  { lesson: 11, hanzi: "哥哥", pinyin: "gē ge", english: "older brother" },
+  { lesson: 11, hanzi: "姐姐", pinyin: "jiě jie", english: "older sister" },
+  { lesson: 12, hanzi: "八", pinyin: "bā", english: "eight" },
+  { lesson: 12, hanzi: "二", pinyin: "èr", english: "two" },
+  { lesson: 12, hanzi: "几", pinyin: "jǐ", english: "how many; several" },
+  { lesson: 12, hanzi: "九", pinyin: "jiǔ", english: "nine" },
+  { lesson: 12, hanzi: "六", pinyin: "liù", english: "six" },
+  { lesson: 12, hanzi: "七", pinyin: "qī", english: "seven" },
+  { lesson: 12, hanzi: "三", pinyin: "sān", english: "three" },
+  { lesson: 12, hanzi: "十", pinyin: "shí", english: "ten" },
+  { lesson: 12, hanzi: "四", pinyin: "sì", english: "four" },
+  { lesson: 12, hanzi: "五", pinyin: "wǔ", english: "five" },
+  { lesson: 12, hanzi: "一", pinyin: "yī", english: "one" },
+  { lesson: 12, hanzi: "弟弟", pinyin: "dì di", english: "younger brother" },
+  { lesson: 12, hanzi: "两", pinyin: "liǎng", english: "two (quantity); both" },
+  { lesson: 12, hanzi: "零", pinyin: "líng", english: "zero; nought" },
+  { lesson: 12, hanzi: "妹妹", pinyin: "mèi mei", english: "younger sister" },
+  { lesson: 12, hanzi: "口", pinyin: "kǒu", english: "mouth; classifier for people" },
+  { lesson: 13, hanzi: "里", pinyin: "lǐ", english: "inside; interior" },
+  { lesson: 13, hanzi: "哪儿", pinyin: "nǎ er", english: "where?" },
+  { lesson: 13, hanzi: "上", pinyin: "shàng", english: "on; above; upper" },
+  { lesson: 13, hanzi: "下", pinyin: "xià", english: "below; under; next" },
+  { lesson: 13, hanzi: "在", pinyin: "zài", english: "at; in; on; to be present" },
+  { lesson: 13, hanzi: "桌子", pinyin: "zhuō zi", english: "table; desk" },
+  { lesson: 13, hanzi: "旁边", pinyin: "páng biān", english: "beside; next to" },
+  { lesson: 13, hanzi: "妻子", pinyin: "qī zi", english: "wife" },
+  { lesson: 13, hanzi: "丈夫", pinyin: "zhàng fu", english: "husband" },
+  { lesson: 13, hanzi: "钥匙", pinyin: "yàoshi", english: "key" },
+  { lesson: 13, hanzi: "沙发", pinyin: "shāfā", english: "sofa" },
+  { lesson: 13, hanzi: "下边", pinyin: "xiàbiān", english: "under; below; underneath" },
+  { lesson: 13, hanzi: "电话", pinyin: "diànhuà", english: "telephone; phone call" },
+  { lesson: 13, hanzi: "手", pinyin: "shǒu", english: "hand" },
+  { lesson: 14, hanzi: "电脑", pinyin: "diàn nǎo", english: "computer" },
+  { lesson: 14, hanzi: "后面", pinyin: "hòu miàn", english: "behind; at the back" },
+  { lesson: 14, hanzi: "前面", pinyin: "qián miàn", english: "ahead; in front" },
+  { lesson: 14, hanzi: "椅子", pinyin: "yǐ zi", english: "chair" },
+  { lesson: 14, hanzi: "外", pinyin: "wài", english: "outside; external" },
+  { lesson: 14, hanzi: "右边", pinyin: "yòu bian", english: "right side; right-hand side" },
+  { lesson: 14, hanzi: "左边", pinyin: "zuǒ bian", english: "left side; left-hand side" },
+  { lesson: 14, hanzi: "餐桌", pinyin: "cānzhuō", english: "dining table" },
+  { lesson: 14, hanzi: "书柜", pinyin: "shūguì", english: "bookcase" },
+  { lesson: 14, hanzi: "衣柜", pinyin: "yīguì", english: "wardrobe; closet" },
+  { lesson: 14, hanzi: "外面", pinyin: "wàimiàn", english: "outside" },
+  { lesson: 15, hanzi: "怎么", pinyin: "zěn me", english: "how; in what way" },
+  { lesson: 15, hanzi: "怎么样", pinyin: "zěn me yàng", english: "how is it? how are things?" },
+  { lesson: 15, hanzi: "没", pinyin: "méi", english: "not (negation)" },
+  { lesson: 15, hanzi: "白", pinyin: "bái", english: "white; blank" },
+  { lesson: 15, hanzi: "穿", pinyin: "chuān", english: "to wear; to put on" },
+  { lesson: 15, hanzi: "红", pinyin: "hóng", english: "red" },
+  { lesson: 15, hanzi: "颜色", pinyin: "yán sè", english: "color" },
+  { lesson: 15, hanzi: "蓝", pinyin: "lán", english: "blue" },
+  { lesson: 15, hanzi: "绿", pinyin: "lǜ", english: "green" },
+  { lesson: 15, hanzi: "裙子", pinyin: "qún zi", english: "skirt" },
+  { lesson: 15, hanzi: "条", pinyin: "tiáo", english: "(classifier for long/thin objects)" },
+  { lesson: 16, hanzi: "黑", pinyin: "hēi", english: "black; dark" },
+  { lesson: 16, hanzi: "手机", pinyin: "shǒu jī", english: "cell phone; mobile phone" },
+  { lesson: 16, hanzi: "棕色", pinyin: "zōngsè", english: "brown" },
+  { lesson: 16, hanzi: "鞋", pinyin: "xié", english: "shoe(s)" },
+  { lesson: 16, hanzi: "灰色", pinyin: "huīsè", english: "gray" },
+  { lesson: 16, hanzi: "衬衣", pinyin: "chènyī", english: "shirt; blouse" },
+  { lesson: 16, hanzi: "旗袍", pinyin: "qípáo", english: "qipao; cheongsam" },
+  { lesson: 16, hanzi: "运动鞋", pinyin: "yùndòngxié", english: "sneakers; sports shoes" },
+  { lesson: 16, hanzi: "橙色", pinyin: "chéngsè", english: "orange (color)" },
+  { lesson: 16, hanzi: "粉色", pinyin: "fěnsè", english: "pink" },
+  { lesson: 16, hanzi: "粉红色", pinyin: "fěnhóngsè", english: "pink (alt.)" },
+  { lesson: 16, hanzi: "衬衫", pinyin: "chèn shān", english: "shirt; blouse" },
+  { lesson: 16, hanzi: "裤子", pinyin: "kù zi", english: "trousers; pants" },
+  { lesson: 16, hanzi: "舒服", pinyin: "shū fu", english: "comfortable; at ease" },
+  { lesson: 16, hanzi: "双", pinyin: "shuāng", english: "pair; double; both" },
+  { lesson: 17, hanzi: "年", pinyin: "nián", english: "year" },
+  { lesson: 17, hanzi: "星期", pinyin: "xīng qī", english: "week; day of the week" },
+  { lesson: 17, hanzi: "月", pinyin: "yuè", english: "month; moon" },
+  { lesson: 17, hanzi: "日", pinyin: "rì", english: "day; sun; date" },
+  { lesson: 17, hanzi: "传统", pinyin: "chuántǒng", english: "tradition; traditional" },
+  { lesson: 17, hanzi: "哪些", pinyin: "nǎxiē", english: "which ones?" },
+  { lesson: 17, hanzi: "春节", pinyin: "Chūnjié", english: "Spring Festival / Chinese New Year" },
+  { lesson: 17, hanzi: "元宵节", pinyin: "Yuánxiāojié", english: "Lantern Festival" },
+  { lesson: 17, hanzi: "中秋节", pinyin: "Zhōngqiūjié", english: "Mid-Autumn Festival" },
+  { lesson: 17, hanzi: "农历", pinyin: "nónglì", english: "lunar calendar" },
+  { lesson: 17, hanzi: "情人节", pinyin: "Qíngrénjié", english: "Valentine's Day" },
+  { lesson: 17, hanzi: "天", pinyin: "tiān", english: "sky; day" },
+  { lesson: 17, hanzi: "节日", pinyin: "jié rì", english: "holiday; festival" },
+  { lesson: 18, hanzi: "号", pinyin: "hào", english: "day of month; number" },
+  { lesson: 18, hanzi: "今天", pinyin: "jīn tiān", english: "today" },
+  { lesson: 18, hanzi: "明天", pinyin: "míng tiān", english: "tomorrow" },
+  { lesson: 18, hanzi: "昨天", pinyin: "zuó tiān", english: "yesterday" },
+  { lesson: 18, hanzi: "劳动节", pinyin: "Láodòngjié", english: "Labor Day" },
+  { lesson: 18, hanzi: "复活节", pinyin: "Fùhuójié", english: "Easter" },
+  { lesson: 18, hanzi: "父亲节", pinyin: "Fùqīnjié", english: "Father's Day" },
+  { lesson: 18, hanzi: "母亲节", pinyin: "Mǔqīnjié", english: "Mother's Day" },
+  { lesson: 18, hanzi: "一月", pinyin: "yīyuè", english: "January" },
+  { lesson: 18, hanzi: "二月", pinyin: "èryuè", english: "February" },
+  { lesson: 18, hanzi: "三月", pinyin: "sānyuè", english: "March" },
+  { lesson: 18, hanzi: "四月", pinyin: "sìyuè", english: "April" },
+  { lesson: 18, hanzi: "五月", pinyin: "wǔyuè", english: "May" },
+  { lesson: 18, hanzi: "六月", pinyin: "liùyuè", english: "June" },
+  { lesson: 18, hanzi: "七月", pinyin: "qīyuè", english: "July" },
+  { lesson: 18, hanzi: "八月", pinyin: "bāyuè", english: "August" },
+  { lesson: 18, hanzi: "九月", pinyin: "jiǔyuè", english: "September" },
+  { lesson: 18, hanzi: "十月", pinyin: "shíyuè", english: "October" },
+  { lesson: 18, hanzi: "十一月", pinyin: "shíyīyuè", english: "November" },
+  { lesson: 18, hanzi: "十二月", pinyin: "shí'èryuè", english: "December" },
+  { lesson: 18, hanzi: "星期一", pinyin: "xīngqīyī", english: "Monday" },
+  { lesson: 18, hanzi: "星期二", pinyin: "xīngqī'èr", english: "Tuesday" },
+  { lesson: 18, hanzi: "星期三", pinyin: "xīngqīsān", english: "Wednesday" },
+  { lesson: 18, hanzi: "星期四", pinyin: "xīngqīsì", english: "Thursday" },
+  { lesson: 18, hanzi: "星期五", pinyin: "xīngqīwǔ", english: "Friday" },
+  { lesson: 18, hanzi: "星期六", pinyin: "xīngqīliù", english: "Saturday" },
+  { lesson: 18, hanzi: "星期日", pinyin: "xīngqīrì", english: "Sunday" },
+  { lesson: 18, hanzi: "星期天", pinyin: "xīngqītiān", english: "Sunday (alt.)" },
+  { lesson: 19, hanzi: "杯子", pinyin: "bēi zi", english: "cup; glass" },
+  { lesson: 19, hanzi: "大", pinyin: "dà", english: "big; large" },
+  { lesson: 19, hanzi: "块", pinyin: "kuài", english: "yuan (money); piece" },
+  { lesson: 19, hanzi: "热", pinyin: "rè", english: "hot; heat" },
+  { lesson: 19, hanzi: "小", pinyin: "xiǎo", english: "small; young" },
+  { lesson: 19, hanzi: "面条", pinyin: "miàn tiáo", english: "noodles" },
+  { lesson: 19, hanzi: "要", pinyin: "yào", english: "to want; will; must" },
+  { lesson: 19, hanzi: "再", pinyin: "zài", english: "again; once more" },
+  { lesson: 19, hanzi: "辣", pinyin: "là", english: "spicy" },
+  { lesson: 19, hanzi: "豆浆", pinyin: "dòujiāng", english: "soy milk" },
+  { lesson: 19, hanzi: "凉", pinyin: "liáng", english: "cold; cool" },
+  { lesson: 19, hanzi: "刷卡", pinyin: "shuākǎ", english: "to pay by card" },
+  { lesson: 19, hanzi: "还是", pinyin: "hái shì", english: "or; still; had better" },
+  { lesson: 19, hanzi: "碗", pinyin: "wǎn", english: "bowl" },
+  { lesson: 19, hanzi: "一共", pinyin: "yī gòng", english: "altogether; in total" },
+  { lesson: 19, hanzi: "元", pinyin: "yuán", english: "yuan (money unit)" },
+  { lesson: 20, hanzi: "米饭", pinyin: "mǐ fàn", english: "(cooked) rice" },
+  { lesson: 20, hanzi: "水", pinyin: "shuǐ", english: "water" },
+  { lesson: 20, hanzi: "咖啡", pinyin: "kā fēi", english: "coffee" },
+  { lesson: 20, hanzi: "汉堡", pinyin: "hànbǎo", english: "hamburger" },
+  { lesson: 20, hanzi: "比萨饼", pinyin: "bǐsàbǐng", english: "pizza" },
+  { lesson: 20, hanzi: "咸", pinyin: "xián", english: "salty" },
+  { lesson: 20, hanzi: "斤", pinyin: "jīn", english: "half a kilogram" },
+  { lesson: 20, hanzi: "饺子", pinyin: "jiǎozi", english: "dumplings" },
+  { lesson: 20, hanzi: "羊肉", pinyin: "yángròu", english: "mutton; lamb" },
+  { lesson: 20, hanzi: "猪肉", pinyin: "zhūròu", english: "pork" },
+  { lesson: 20, hanzi: "牛肉", pinyin: "niúròu", english: "beef" },
+  { lesson: 20, hanzi: "瓶", pinyin: "píng", english: "bottle" },
+  { lesson: 20, hanzi: "可乐", pinyin: "kělè", english: "cola" },
+  { lesson: 20, hanzi: "公斤", pinyin: "gōng jīn", english: "kilogram" },
+  { lesson: 20, hanzi: "甜", pinyin: "tián", english: "sweet" },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+const LS_KEY = "hanzi-quiz-v3";
+const LESSONS = [...new Set(VOCAB.map(v => v.lesson))].sort((a, b) => a - b);
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function load() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; } }
+function save(o) { try { localStorage.setItem(LS_KEY, JSON.stringify(o)); } catch {} }
+
+// ── FIX 1: stats keyed by hanzi, tracked at the CHARACTER level.
+// wrong is incremented ONLY when user taps wrong after all hints are shown
+// (level 2 → move on), OR taps wrong at level 0 or 1 while THAT card
+// is still being answered. We track wrongThisCard so we only count once
+// per card attempt, not once per wrong tap.
+// ── FIX 2: Stop button saves all data mid-session.
+
+export default function HanziQuiz() {
+  const [screen, setScreen]       = useState("home");
+  const [deck, setDeck]           = useState([]);
+  const [idx, setIdx]             = useState(0);
+  const [level, setLevel]         = useState(0);       // 0=hanzi only 1=+pinyin 2=+english
+  const [stats, setStats]         = useState({});      // { hanzi: {wrong, seen, wrongCards:[]} }
+  const [sRight, setSRight]       = useState(0);
+  const [sWrong, setSWrong]       = useState(0);
+  const [animKey, setAnimKey]     = useState(0);
+  const [shake, setShake]         = useState(false);
+  const [wrongThisCard, setWrongThisCard] = useState(false); // track if current card was missed
+  const [confirming, setConfirming]       = useState(false); // show answer confirmation after Got it
+  const [selMode, setSelMode]     = useState("all");
+  const [selSingle, setSelSingle] = useState(null);
+  const [selFrom, setSelFrom]     = useState(null);
+  const [selTo, setSelTo]         = useState(null);
+  const [statsTab, setStatsTab]   = useState("list");
+  const [showStopConfirm, setShowStopConfirm] = useState(false);
+
+  useEffect(() => {
+    const s = load();
+    if (s.stats) setStats(s.stats);
+  }, []);
+
+  useEffect(() => { save({ stats }); }, [stats]);
+
+  const card     = deck[idx];
+  const total    = deck.length;
+  const progress = total > 0 ? (idx / total) * 100 : 0;
+
+  function getSelectedLessons() {
+    if (selMode === "all")    return LESSONS;
+    if (selMode === "single") return selSingle != null ? [selSingle] : [];
+    if (selMode === "range") {
+      if (selFrom == null || selTo == null) return [];
+      const f = Math.min(selFrom, selTo), t = Math.max(selFrom, selTo);
+      return LESSONS.filter(l => l >= f && l <= t);
+    }
+    return [];
+  }
+
+  const selectedLessons = getSelectedLessons();
+  const selectedVocab   = VOCAB.filter(v => selectedLessons.includes(v.lesson));
+
+  function lessonLabel() {
+    if (selMode === "all") return "All Lessons";
+    if (selMode === "single" && selSingle) return `Lesson ${selSingle}`;
+    if (selMode === "range" && selFrom && selTo)
+      return `Lessons ${Math.min(selFrom,selTo)}–${Math.max(selFrom,selTo)}`;
+    return "";
+  }
+
+  function startQuiz() {
+    if (selectedVocab.length === 0) return;
+    setDeck(shuffle(selectedVocab));
+    setIdx(0); setLevel(0);
+    setSRight(0); setSWrong(0);
+    setWrongThisCard(false);
+    setConfirming(false);
+    setAnimKey(k => k + 1);
+    setShowStopConfirm(false);
+    setScreen("quiz");
+  }
+
+  // ── FIX 1 core: record wrong at CHARACTER level, only once per card ──────
+  function recordWrongForCard(hanzi) {
+    if (wrongThisCard) return; // already counted this card
+    setWrongThisCard(true);
+    setSWrong(w => w + 1);
+    setStats(s => {
+      const p = s[hanzi] || { wrong: 0, seen: 0, wrongCards: [] };
+      return {
+        ...s,
+        [hanzi]: {
+          ...p,
+          wrong: p.wrong + 1,
+          // keep last 20 wrong timestamps for history
+          wrongCards: [...(p.wrongCards || []), Date.now()].slice(-20),
+        },
+      };
+    });
+  }
+
+  function recordSeen(hanzi) {
+    setStats(s => {
+      const p = s[hanzi] || { wrong: 0, seen: 0, wrongCards: [] };
+      return { ...s, [hanzi]: { ...p, seen: p.seen + 1 } };
+    });
+  }
+
+  function goNextCard() {
+    if (idx + 1 >= deck.length) { setScreen("done"); return; }
+    setIdx(i => i + 1);
+    setLevel(0);
+    setWrongThisCard(false);
+    setConfirming(false);
+    setAnimKey(k => k + 1);
+  }
+
+  function handleRight() {
+    if (level === 0) {
+      // Answered at hanzi level — count as correct, show confirmation
+      recordSeen(card.hanzi);
+      setSRight(r => r + 1);
+      setConfirming(true);
+    } else {
+      // Hints were already shown — card was already counted as wrong.
+      // Just move on, no correct score added.
+      recordSeen(card.hanzi);
+      goNextCard();
+    }
+  }
+
+  function handleConfirmNext() {
+    setConfirming(false);
+    goNextCard();
+  }
+
+  function handleWrong() {
+    setShake(true);
+    setTimeout(() => setShake(false), 450);
+
+    if (level === 0) {
+      // First wrong tap: reveal pinyin, mark card as wrong
+      recordWrongForCard(card.hanzi);
+      setLevel(1);
+    } else if (level === 1) {
+      // Second wrong tap: reveal english — don't add another wrong count
+      setLevel(2);
+    } else {
+      // Already fully revealed: move on, record seen
+      recordSeen(card.hanzi);
+      goNextCard();
+    }
+  }
+
+  // ── FIX 2: Stop mid-session — saves all progress up to current card ──────
+  function handleStop() {
+    // Record current card as seen (partially attempted)
+    if (card) recordSeen(card.hanzi);
+    setShowStopConfirm(false);
+    setScreen("done");
+  }
+
+  function clearStats() {
+    if (!window.confirm("Clear all stats? This cannot be undone.")) return;
+    setStats({});
+  }
+
+  const statsList = VOCAB.map(v => ({
+    ...v,
+    wrong: stats[v.hanzi]?.wrong || 0,
+    seen:  stats[v.hanzi]?.seen  || 0,
+  })).sort((a, b) => b.wrong - a.wrong);
+
+  const chartData = LESSONS.map(l => ({
+    name: `L${l}`,
+    wrong: VOCAB.filter(v => v.lesson === l).reduce((a, v) => a + (stats[v.hanzi]?.wrong || 0), 0),
+    words: VOCAB.filter(v => v.lesson === l).length,
+  }));
+
+  const accuracy = (sRight + sWrong) > 0
+    ? Math.round((sRight / (sRight + sWrong)) * 100) : 0;
+
+  function LessonBtn({ lesson, active, onClick }) {
+    const count = VOCAB.filter(v => v.lesson === lesson).length;
+    return (
+      <button onClick={onClick} style={{
+        border: active ? "2px solid #2d5a27" : "1.5px solid #ddd5c0",
+        background: active ? "#2d5a27" : "#fff",
+        color: active ? "#f5f0e8" : "#5a4a30",
+        borderRadius: 12, padding: "10px 6px", cursor: "pointer",
+        fontFamily: "'Crimson Pro',serif", transition: "all .15s",
+        display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+      }}>
+        <span style={{ fontSize: 14, fontWeight: 600 }}>L{lesson}</span>
+        <span style={{ fontSize: 10, opacity: .7 }}>{count}w</span>
+      </button>
+    );
+  }
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: "#f5f0e8",
+      fontFamily: "'Noto Serif SC','Georgia',serif",
+      display: "flex", flexDirection: "column", alignItems: "center",
+      padding: "24px 18px 64px", position: "relative", overflow: "hidden",
+    }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes popIn{0%{transform:scale(.88);opacity:0}70%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
+        @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+        .fade-up{animation:fadeUp .35s ease forwards}
+        .pop-in{animation:popIn .32s ease forwards}
+        .shake{animation:shake .42s ease}
+        .slide-down{animation:slideDown .28s ease forwards}
+        .btn-green{background:#2d5a27;color:#f5f0e8;border:none;border-radius:14px;
+          padding:16px 28px;font-family:'Crimson Pro',serif;font-size:18px;font-weight:600;
+          cursor:pointer;transition:all .2s;letter-spacing:.03em;box-shadow:0 4px 16px #2d5a2728}
+        .btn-green:hover{background:#234a1e;transform:translateY(-2px)}
+        .btn-green:active{transform:translateY(0)}
+        .btn-green:disabled{opacity:.35;cursor:not-allowed;transform:none}
+        .btn-red{background:#fff;color:#8b2020;border:2px solid #c8a8a8;border-radius:14px;
+          padding:16px 28px;font-family:'Crimson Pro',serif;font-size:18px;font-weight:600;
+          cursor:pointer;transition:all .2s}
+        .btn-red:hover{background:#fdf0f0;border-color:#8b2020;transform:translateY(-2px)}
+        .btn-stop{background:#fff;color:#8b4a10;border:2px solid #e8c8a0;border-radius:14px;
+          padding:12px 20px;font-family:'Crimson Pro',serif;font-size:15px;font-weight:600;
+          cursor:pointer;transition:all .2s;width:100%}
+        .btn-stop:hover{background:#fdf5ee;border-color:#c87830;transform:translateY(-1px)}
+        .btn-outline{background:none;border:1.5px solid #8b7355;color:#5a4a30;border-radius:10px;
+          padding:11px 22px;font-family:'Crimson Pro',serif;font-size:15px;cursor:pointer;transition:all .2s}
+        .btn-outline:hover{background:#e8e0d0;transform:translateY(-1px)}
+        .mode-btn{border:1.5px solid #ddd5c0;background:#fff;color:#5a4a30;border-radius:10px;
+          padding:9px 14px;font-family:'Crimson Pro',serif;font-size:13px;cursor:pointer;
+          transition:all .15s;white-space:nowrap}
+        .mode-btn.sel{border-color:#2d5a27;background:#f0f7ef;color:#2d5a27;font-weight:600}
+        .stab{background:none;border:none;cursor:pointer;font-family:'Crimson Pro',serif;
+          font-size:14px;color:#8b7355;padding:7px 14px;border-bottom:2px solid transparent;transition:all .2s}
+        .stab.on{color:#2d3a1e;border-bottom-color:#2d5a27}
+        ::-webkit-scrollbar{width:3px}
+        ::-webkit-scrollbar-thumb{background:#c8b898;border-radius:2px}
+      `}</style>
+
+      {/* BG decorative */}
+      <div style={{ position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0 }}>
+        {["字","学","文","语","词","汉","话","读"].map((c, i) => (
+          <div key={i} style={{ position:"absolute", fontSize:`${110+i*28}px`, color:"#2d3a1e07",
+            fontWeight:700, left:`${[5,20,45,70,85,10,55,75][i]}%`,
+            top:`${[10,60,20,70,40,85,50,15][i]}%`, transform:"rotate(-15deg)", userSelect:"none" }}>
+            {c}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ width:"100%", maxWidth:460, position:"relative", zIndex:1 }}>
+
+        {/* ══ HOME ══ */}
+        {screen === "home" && (
+          <div className="fade-up" style={{ textAlign:"center", paddingTop:24 }}>
+            <div style={{ fontSize:52, marginBottom:4 }}>汉字</div>
+            <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#8b7355",
+                          letterSpacing:".25em", marginBottom:4 }}>HÀNZÌ FLASHCARDS</div>
+            <div style={{ width:36, height:2, background:"#8b7355", margin:"12px auto 22px" }} />
+
+            <div style={{ background:"#fff", border:"1px solid #ddd5c0", borderRadius:20,
+                          padding:"18px", marginBottom:16, boxShadow:"0 4px 24px #2d3a1e0a" }}>
+              <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                            letterSpacing:".2em", marginBottom:12 }}>
+                {LESSONS.length} LESSONS · {VOCAB.length} WORDS
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6 }}>
+                {LESSONS.map(l => {
+                  const count  = VOCAB.filter(v => v.lesson === l).length;
+                  const wrongs = VOCAB.filter(v => v.lesson === l)
+                    .reduce((a, v) => a + (stats[v.hanzi]?.wrong || 0), 0);
+                  const seen   = VOCAB.filter(v => v.lesson === l)
+                    .filter(v => (stats[v.hanzi]?.seen || 0) > 0).length;
+                  return (
+                    <div key={l} style={{ background: seen === count ? "#f0f7ef" : "#f5f0e8",
+                                          border:`1px solid ${seen===count?"#c8ddc4":"#e8e0d0"}`,
+                                          borderRadius:10, padding:"8px 4px", textAlign:"center" }}>
+                      <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:700,
+                                    fontSize:12, color:"#2d3a1e" }}>L{l}</div>
+                      <div style={{ fontSize:10, color:"#8b7355" }}>{count}w</div>
+                      {wrongs > 0
+                        ? <div style={{ fontSize:10, color:"#8b2020" }}>✗{wrongs}</div>
+                        : seen > 0
+                        ? <div style={{ fontSize:10, color:"#2d5a27" }}>✓</div>
+                        : <div style={{ fontSize:10, color:"#c8b898" }}>new</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button className="btn-green" style={{ width:"100%", fontSize:18, padding:"16px", marginBottom:10 }}
+                    onClick={() => setScreen("select")}>
+              开始练习 · Start Practice
+            </button>
+            <button className="btn-outline" style={{ width:"100%" }}
+                    onClick={() => setScreen("stats")}>
+              查看统计 · View Stats
+            </button>
+            <div style={{ marginTop:22, fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                          color:"#b0a08a", fontSize:13, lineHeight:1.9 }}>
+              汉字 → ✗ Wrong → pīnyīn shown<br/>
+              → ✗ Wrong → English shown → ✗ → next card
+            </div>
+          </div>
+        )}
+
+        {/* ══ LESSON SELECT ══ */}
+        {screen === "select" && (
+          <div className="fade-up">
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
+              <button onClick={() => setScreen("home")}
+                      style={{ background:"none", border:"none", color:"#8b7355",
+                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
+                ← Back
+              </button>
+              <div style={{ fontFamily:"'Noto Serif SC'", fontSize:17, fontWeight:600, color:"#2d3a1e" }}>
+                Choose Lessons
+              </div>
+            </div>
+
+            <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                          letterSpacing:".18em", marginBottom:10 }}>PRACTICE MODE</div>
+            <div style={{ display:"flex", gap:8, marginBottom:20, flexWrap:"wrap" }}>
+              {[["all","All Lessons"],["single","One Lesson"],["range","Lesson Range"]].map(([m,lbl]) => (
+                <button key={m} className={`mode-btn ${selMode===m?"sel":""}`}
+                        onClick={() => setSelMode(m)}>{lbl}</button>
+              ))}
+            </div>
+
+            {selMode === "all" && (
+              <div style={{ background:"#fff", border:"1px solid #ddd5c0", borderRadius:16,
+                            padding:18, marginBottom:16, textAlign:"center" }}>
+                <div style={{ fontSize:28, marginBottom:6 }}>📚</div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:18,
+                              color:"#2d3a1e", fontWeight:600 }}>All {VOCAB.length} words</div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                              fontSize:14, color:"#8b7355", marginTop:4 }}>
+                  Lessons {LESSONS[0]}–{LESSONS[LESSONS.length-1]}
+                </div>
+              </div>
+            )}
+
+            {selMode === "single" && (
+              <div style={{ marginBottom:16 }}>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                              letterSpacing:".18em", marginBottom:10 }}>SELECT LESSON</div>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6 }}>
+                  {LESSONS.map(l => (
+                    <LessonBtn key={l} lesson={l} active={selSingle===l}
+                               onClick={() => setSelSingle(l)} />
+                  ))}
+                </div>
+                {selSingle != null && (
+                  <div style={{ marginTop:10, fontFamily:"'Crimson Pro',serif",
+                                fontSize:13, color:"#8b7355", textAlign:"center" }}>
+                    {VOCAB.filter(v => v.lesson === selSingle).length} words in Lesson {selSingle}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selMode === "range" && (
+              <div style={{ marginBottom:16 }}>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+                  {[["FROM", selFrom, setSelFrom],["TO", selTo, setSelTo]].map(([lbl,val,setter]) => (
+                    <div key={lbl}>
+                      <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                                    letterSpacing:".18em", marginBottom:8 }}>{lbl} LESSON</div>
+                      <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:5 }}>
+                        {LESSONS.map(l => (
+                          <LessonBtn key={l} lesson={l} active={val===l}
+                                     onClick={() => setter(l)} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {selFrom != null && selTo != null && (
+                  <div style={{ marginTop:12, background:"#f0f7ef", border:"1px solid #c8ddc4",
+                                borderRadius:12, padding:"10px 14px", textAlign:"center",
+                                fontFamily:"'Crimson Pro',serif" }}>
+                    <span style={{ color:"#2d5a27", fontWeight:600 }}>{selectedVocab.length} words</span>
+                    <span style={{ color:"#8b7355" }}>
+                      {" "}· Lessons {Math.min(selFrom,selTo)}–{Math.max(selFrom,selTo)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selectedVocab.length > 0 && (
+              <div style={{ background:"#fff", border:"1px solid #ddd5c0", borderRadius:14,
+                            padding:"12px 14px", marginBottom:16 }}>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                              letterSpacing:".18em", marginBottom:8 }}>
+                  PREVIEW — {selectedVocab.length} WORDS
+                </div>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:5, maxHeight:75, overflowY:"auto" }}>
+                  {selectedVocab.map((v,i) => (
+                    <span key={i} style={{ background:"#f5f0e8", border:"1px solid #e8e0d0",
+                                           borderRadius:6, padding:"2px 8px",
+                                           fontSize:16, color:"#2d3a1e" }}>{v.hanzi}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button className="btn-green" style={{ width:"100%" }}
+                    disabled={selectedVocab.length === 0}
+                    onClick={startQuiz}>
+              {selectedVocab.length > 0
+                ? `开始 · Start ${selectedVocab.length} Words`
+                : "Select a lesson to continue"}
+            </button>
+          </div>
+        )}
+
+        {/* ══ QUIZ ══ */}
+        {screen === "quiz" && card && (
+          <div>
+            {/* Stop confirm modal */}
+            {showStopConfirm && (
+              <div style={{ position:"fixed", inset:0, background:"#00000066", display:"flex",
+                            alignItems:"center", justifyContent:"center", zIndex:100, padding:24 }}>
+                <div className="fade-up" style={{ background:"#fff", border:"1px solid #ddd5c0",
+                     borderRadius:20, padding:28, width:"100%", maxWidth:340, textAlign:"center" }}>
+                  <div style={{ fontSize:32, marginBottom:8 }}>⏹</div>
+                  <div style={{ fontFamily:"'Noto Serif SC'", fontSize:18, color:"#2d3a1e",
+                                fontWeight:600, marginBottom:8 }}>Stop Practice?</div>
+                  <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:14, color:"#8b7355",
+                                marginBottom:20, lineHeight:1.6 }}>
+                    Your progress so far will be saved.<br/>
+                    <strong style={{ color:"#2d5a27" }}>✓ {sRight} correct</strong>
+                    {"  "}
+                    <strong style={{ color:"#8b2020" }}>✗ {sWrong} wrong</strong>
+                    {" "}out of {idx} cards answered.
+                  </div>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                    <button className="btn-outline" onClick={() => setShowStopConfirm(false)}>
+                      Keep Going
+                    </button>
+                    <button className="btn-stop" onClick={handleStop}
+                            style={{ borderRadius:10, fontSize:15 }}>
+                      Stop & Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display:"flex", justifyContent:"space-between",
+                          alignItems:"center", marginBottom:10 }}>
+              <button onClick={() => setScreen("select")}
+                      style={{ background:"none", border:"none", color:"#8b7355",
+                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
+                ← Back
+              </button>
+              <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#8b7355" }}>
+                {idx + 1} / {total}
+              </div>
+            </div>
+
+            <div style={{ background:"#ddd5c0", borderRadius:999, height:4,
+                          marginBottom:14, overflow:"hidden" }}>
+              <div style={{ height:"100%", borderRadius:999, background:"#2d5a27",
+                            width:`${progress}%`, transition:"width 0.5s ease" }} />
+            </div>
+
+            <div style={{ textAlign:"center", marginBottom:8 }}>
+              <span style={{ background:"#f0f7ef", border:"1px solid #c8ddc4", borderRadius:999,
+                             padding:"3px 12px", fontFamily:"'Crimson Pro',serif",
+                             fontSize:12, color:"#2d5a27" }}>
+                Lesson {card.lesson}
+              </span>
+            </div>
+
+            {/* Card */}
+            <div key={animKey}
+                 className={`pop-in ${shake ? "shake" : ""}`}
+                 style={{ background: confirming ? "#f0f7ef" : "#fff",
+                          border: confirming ? "2px solid #2d5a27" : "1px solid #ddd5c0",
+                          borderRadius:24, boxShadow:"0 8px 40px #2d3a1e0d", padding:"40px 24px",
+                          textAlign:"center", minHeight:230,
+                          display:"flex", flexDirection:"column",
+                          alignItems:"center", justifyContent:"center",
+                          gap:14, marginBottom:12, transition:"background .25s, border .25s" }}>
+
+              {/* Hanzi — always shown */}
+              <div style={{ fontSize: card.hanzi.length > 4 ? 48 : card.hanzi.length > 2 ? 62 : 78,
+                            lineHeight:1.1,
+                            color: confirming ? "#2d5a27" : "#1a2410",
+                            textShadow:"0 2px 8px #2d3a1e12",
+                            transition:"color .25s" }}>
+                {card.hanzi}
+              </div>
+
+              {/* Pinyin — shown when wrong revealed OR confirming */}
+              {(level >= 1 || confirming) && (
+                <div className="slide-down"
+                     style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                              fontSize:24, color:"#2d5a27", letterSpacing:".04em" }}>
+                  {card.pinyin}
+                </div>
+              )}
+
+              {/* English — shown when wrong revealed OR confirming */}
+              {(level >= 2 || confirming) && (
+                <div className="slide-down"
+                     style={{ fontFamily:"'Crimson Pro',serif", fontSize:18, color:"#5a4a30" }}>
+                  {card.english}
+                </div>
+              )}
+
+              {/* Status label */}
+              {confirming && (
+                <div className="slide-down"
+                     style={{ fontSize:11, color:"#2d5a27", letterSpacing:".15em",
+                              fontFamily:"'Crimson Pro',serif", fontWeight:600 }}>
+                  ✓ CORRECT — CHECK YOUR ANSWER
+                </div>
+              )}
+              {!confirming && level > 0 && (
+                <div style={{ fontSize:10, color:"#c8b898", letterSpacing:".15em",
+                              fontFamily:"'Crimson Pro',serif" }}>
+                  {level === 1 ? "PINYIN REVEALED" : "ENGLISH REVEALED"}
+                </div>
+              )}
+            </div>
+
+            {/* Past wrong badge */}
+            {!confirming && (stats[card.hanzi]?.wrong || 0) > 0 && (
+              <div style={{ textAlign:"center", marginBottom:10 }}>
+                <span style={{ background:"#fdf0f0", border:"1px solid #e8c8c8", borderRadius:999,
+                               padding:"3px 12px", fontSize:12, color:"#8b2020",
+                               fontFamily:"'Crimson Pro',serif" }}>
+                  ✗ Missed {stats[card.hanzi].wrong}× total
+                </span>
+              </div>
+            )}
+
+            {/* Action buttons — swap to confirm mode after Got it */}
+            {confirming ? (
+              <button className="btn-green" style={{ width:"100%", fontSize:19,
+                                                     padding:"18px", marginBottom:10 }}
+                      onClick={handleConfirmNext}>
+                Next → 下一个
+              </button>
+            ) : (
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
+                <button className="btn-red" onClick={handleWrong}>
+                  {level === 0 ? "✗ Wrong" : level === 1 ? "✗ Still wrong" : "✗ Move on"}
+                </button>
+                <button className="btn-green" onClick={handleRight}>
+                  {level === 0 ? "✓ Got it" : "Next →"}
+                </button>
+              </div>
+            )}
+
+            {/* Stop button — hidden during confirmation */}
+            {!confirming && (
+              <button className="btn-stop" onClick={() => setShowStopConfirm(true)}>
+                ⏹ Stop &amp; Save Progress
+              </button>
+            )}
+
+            {/* Session counters */}
+            <div style={{ display:"flex", justifyContent:"center", gap:24, marginTop:12,
+                          fontFamily:"'Crimson Pro',serif", fontSize:14, color:"#8b7355" }}>
+              <span style={{ color:"#2d5a27" }}>✓ {sRight}</span>
+              <span style={{ color:"#8b2020" }}>✗ {sWrong}</span>
+              <span>{total - idx - 1} left</span>
+            </div>
+          </div>
+        )}
+
+        {/* ══ DONE ══ */}
+        {screen === "done" && (
+          <div className="fade-up" style={{ textAlign:"center", paddingTop:28 }}>
+            <div style={{ fontSize:44, marginBottom:8 }}>
+              {accuracy >= 80 ? "🎉" : accuracy >= 50 ? "💪" : "📖"}
+            </div>
+            <div style={{ fontFamily:"'Noto Serif SC'", fontSize:22, color:"#2d3a1e", marginBottom:2 }}>
+              练习完成
+            </div>
+            <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:14,
+                          color:"#8b7355", marginBottom:22 }}>
+              Practice Complete · {lessonLabel()}
+            </div>
+
+            <div style={{ background:"#fff", border:"1px solid #ddd5c0", borderRadius:20,
+                          padding:18, marginBottom:18,
+                          display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+              {[
+                { label:"Correct",  val:sRight, color:"#2d5a27" },
+                { label:"Wrong",    val:sWrong, color:"#8b2020" },
+                { label:"Answered", val:sRight+sWrong, color:"#2d3a1e" },
+                { label:"Accuracy",
+                  val:`${accuracy}%`,
+                  color: accuracy>=80?"#2d5a27":accuracy>=50?"#8b6914":"#8b2020" },
+              ].map(s => (
+                <div key={s.label} style={{ background:"#f5f0e8", borderRadius:12,
+                                            padding:"12px 8px", textAlign:"center" }}>
+                  <div style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                                fontSize:12, color:"#8b7355", marginBottom:4 }}>{s.label}</div>
+                  <div style={{ fontFamily:"'Noto Serif SC'", fontSize:24,
+                                fontWeight:700, color:s.color }}>{s.val}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Missed characters this session — shown as Chinese characters */}
+            {sWrong > 0 && (
+              <div style={{ background:"#fdf5f5", border:"1px solid #e8c8c8",
+                            borderRadius:14, padding:"14px 16px", marginBottom:16, textAlign:"left" }}>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b2020",
+                              letterSpacing:".15em", marginBottom:10 }}>
+                  CHARACTERS TO REVIEW ({sWrong})
+                </div>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                  {deck.filter(v => wrongThisCard || (stats[v.hanzi]?.wrongCards || []).length > 0)
+                       .filter((v, i, arr) => arr.findIndex(x => x.hanzi === v.hanzi) === i)
+                       .filter(v => (stats[v.hanzi]?.wrong || 0) > 0)
+                       .map((v, i) => (
+                    <div key={i} style={{ background:"#fff", border:"1px solid #e8c8c8",
+                                          borderRadius:8, padding:"4px 10px", textAlign:"center" }}>
+                      <div style={{ fontSize:20, color:"#8b2020" }}>{v.hanzi}</div>
+                      <div style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                                    fontSize:11, color:"#c8a0a0" }}>{v.pinyin}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button className="btn-green" style={{ width:"100%", marginBottom:10 }}
+                    onClick={startQuiz}>再来一次 · Practice Again</button>
+            <button className="btn-outline" style={{ width:"100%", marginBottom:8 }}
+                    onClick={() => setScreen("select")}>Change Lessons</button>
+            <button className="btn-outline" style={{ width:"100%", marginBottom:8 }}
+                    onClick={() => setScreen("stats")}>查看统计 · View Stats</button>
+            <button className="btn-outline" style={{ width:"100%" }}
+                    onClick={() => setScreen("home")}>← Home</button>
+          </div>
+        )}
+
+        {/* ══ STATS ══ */}
+        {screen === "stats" && (
+          <div className="fade-up">
+            <div style={{ display:"flex", justifyContent:"space-between",
+                          alignItems:"center", marginBottom:16 }}>
+              <div>
+                <div style={{ fontFamily:"'Noto Serif SC'", fontSize:19, fontWeight:600,
+                              color:"#2d3a1e" }}>统计 · Stats</div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:12,
+                              color:"#8b7355", marginTop:2 }}>Ranked by difficulty</div>
+              </div>
+              <button onClick={() => setScreen("home")}
+                      style={{ background:"none", border:"none", color:"#8b7355",
+                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
+                ← Back
+              </button>
+            </div>
+
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8, marginBottom:14 }}>
+              {[
+                { label:"Total Words",  val:VOCAB.length },
+                { label:"Reviewed",     val:statsList.filter(s => s.seen > 0).length },
+                { label:"Total Missed", val:statsList.reduce((a,s) => a+s.wrong, 0) },
+              ].map(s => (
+                <div key={s.label} style={{ background:"#fff", border:"1px solid #ddd5c0",
+                     borderRadius:12, padding:"10px 6px", textAlign:"center" }}>
+                  <div style={{ fontFamily:"'Noto Serif SC'", fontSize:20,
+                                fontWeight:700, color:"#2d3a1e" }}>{s.val}</div>
+                  <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:10,
+                                color:"#8b7355", marginTop:2 }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display:"flex", borderBottom:"1px solid #e8e0d0", marginBottom:14 }}>
+              <button className={`stab ${statsTab==="list"?"on":""}`}
+                      onClick={() => setStatsTab("list")}>WORD LIST</button>
+              <button className={`stab ${statsTab==="chart"?"on":""}`}
+                      onClick={() => setStatsTab("chart")}>BY LESSON</button>
+            </div>
+
+            {statsTab === "list" && (
+              <div style={{ background:"#fff", border:"1px solid #ddd5c0",
+                            borderRadius:20, overflow:"hidden", marginBottom:12 }}>
+                {statsList.map((v, i) => (
+                  <div key={`${v.hanzi}-${i}`} style={{
+                    display:"flex", alignItems:"center", gap:10,
+                    padding:"10px 14px",
+                    borderBottom: i < statsList.length-1 ? "1px solid #f0ebe0" : "none",
+                    background: v.wrong >= 3 ? "#fdf5f5" : "transparent",
+                  }}>
+                    <div style={{ fontFamily:"'Noto Serif SC'", fontSize:20,
+                                  color:"#2d3a1e", minWidth:38 }}>{v.hanzi}</div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                                    fontSize:13, color:"#2d5a27" }}>{v.pinyin}</div>
+                      <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:12,
+                                    color:"#8b7355" }}>{v.english}</div>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column",
+                                  alignItems:"flex-end", gap:2, minWidth:42 }}>
+                      <span style={{ background:"#f5f0e8", border:"1px solid #e0d8c8",
+                                     borderRadius:5, padding:"1px 5px", fontSize:9,
+                                     color:"#8b7355", fontFamily:"'Crimson Pro',serif" }}>
+                        L{v.lesson}
+                      </span>
+                      {v.wrong > 0 && (
+                        <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:600,
+                                      fontSize:13, color:"#8b2020" }}>✗ {v.wrong}</div>
+                      )}
+                      <div style={{ fontSize:9, color:"#c8b898", fontFamily:"'Crimson Pro',serif",
+                                    fontStyle: v.seen===0 ? "italic" : "normal" }}>
+                        {v.seen === 0 ? "new" : `${v.seen} seen`}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {statsTab === "chart" && (
+              <div style={{ background:"#fff", border:"1px solid #ddd5c0",
+                            borderRadius:20, padding:16, marginBottom:12 }}>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                              letterSpacing:".15em", marginBottom:12 }}>
+                  WRONG ANSWERS PER LESSON
+                </div>
+                <ResponsiveContainer width="100%" height={180}>
+                  <BarChart data={chartData} barSize={16}>
+                    <XAxis dataKey="name"
+                           tick={{ fill:"#8b7355", fontSize:10, fontFamily:"Crimson Pro" }}
+                           axisLine={false} tickLine={false} />
+                    <YAxis hide />
+                    <Tooltip
+                      contentStyle={{ background:"#fff8f0", border:"1px solid #ddd5c0",
+                                      borderRadius:8, fontSize:11, fontFamily:"Crimson Pro",
+                                      color:"#2d3a1e" }}
+                      formatter={(v,n,p) => [`${v} wrong / ${p.payload.words} words`, ""]}
+                      labelStyle={{ color:"#5a4a30", fontWeight:600 }}
+                      cursor={{ fill:"#2d3a1e08" }}
+                    />
+                    <Bar dataKey="wrong" radius={[4,4,0,0]}>
+                      {chartData.map((entry, i) => (
+                        <Cell key={i}
+                          fill={entry.wrong===0?"#e8e0d0":entry.wrong>=5?"#8b2020":"#c8785a"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+                <div style={{ display:"flex", gap:12, marginTop:8, fontSize:11,
+                              fontFamily:"'Crimson Pro',serif" }}>
+                  <span style={{ color:"#8b2020" }}>■ 5+ wrong</span>
+                  <span style={{ color:"#c8785a" }}>■ 1–4 wrong</span>
+                  <span style={{ color:"#e8e0d0" }}>■ clean</span>
+                </div>
+              </div>
+            )}
+
+            <button className="btn-outline" style={{ width:"100%", marginBottom:8 }}
+                    onClick={() => setScreen("select")}>Start Practice</button>
+            <button onClick={clearStats}
+                    style={{ background:"none", border:"none", color:"#c8a8a8",
+                             fontFamily:"'Crimson Pro',serif", fontSize:12,
+                             cursor:"pointer", width:"100%", padding:"8px" }}>
+              Clear all stats
+            </button>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
