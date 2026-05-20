@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-// ── VOCAB — Lessons 1–25 ───────────────────────────────────────────────────
+// ── VOCAB ─────────────────────────────────────────────────────────────────────
 const VOCAB = [
   { lesson: 1, hanzi: "好", pinyin: "hǎo", english: "good; well" },
   { lesson: 1, hanzi: "叫", pinyin: "jiào", english: "to be called; to call" },
@@ -322,7 +322,7 @@ const VOCAB = [
   { lesson: 25, hanzi: "同事", pinyin: "tóng shì", english: "colleague; coworker" },
 ];
 
-// ── GRAMMAR CARDS — Lessons 1–30 ─────────────────────────────────────────
+// ── GRAMMAR CARDS ─────────────────────────────────────────────────────────────
 const GRAMMAR = [
   {
     lesson: 1,
@@ -583,25 +583,20 @@ function shuffle(arr) {
 function load() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch { return {}; } }
 function save(o) { try { localStorage.setItem(LS_KEY, JSON.stringify(o)); } catch {} }
 
-// ── FIX 1: stats keyed by hanzi, tracked at the CHARACTER level.
-// wrong is incremented ONLY when user taps wrong after all hints are shown
-// (level 2 → move on), OR taps wrong at level 0 or 1 while THAT card
-// is still being answered. We track wrongThisCard so we only count once
-// per card attempt, not once per wrong tap.
-// ── FIX 2: Stop button saves all data mid-session.
-
 export default function HanziQuiz() {
+
+  // ── Vocab state ──────────────────────────────────────────────────────────
   const [screen, setScreen]       = useState("home");
   const [deck, setDeck]           = useState([]);
   const [idx, setIdx]             = useState(0);
-  const [level, setLevel]         = useState(0);       // 0=hanzi only 1=+pinyin 2=+english
-  const [stats, setStats]         = useState({});      // { hanzi: {wrong, seen, wrongCards:[]} }
+  const [level, setLevel]         = useState(0);
+  const [stats, setStats]         = useState({});
   const [sRight, setSRight]       = useState(0);
   const [sWrong, setSWrong]       = useState(0);
   const [animKey, setAnimKey]     = useState(0);
   const [shake, setShake]         = useState(false);
-  const [wrongThisCard, setWrongThisCard] = useState(false); // track if current card was missed
-  const [confirming, setConfirming]       = useState(false); // show answer confirmation after Got it
+  const [wrongThisCard, setWrongThisCard] = useState(false);
+  const [confirming, setConfirming]       = useState(false);
   const [selMode, setSelMode]     = useState("all");
   const [selSingle, setSelSingle] = useState(null);
   const [selFrom, setSelFrom]     = useState(null);
@@ -609,17 +604,15 @@ export default function HanziQuiz() {
   const [statsTab, setStatsTab]   = useState("list");
   const [showStopConfirm, setShowStopConfirm] = useState(false);
 
-  // ── Grammar mode state ──
-  const [mode, setMode]               = useState("home");   // home | vocab | grammar
-  const [gDeck, setGDeck]             = useState([]);
-  const [gIdx, setGIdx]               = useState(0);
-  const [gFlipped, setGFlipped]       = useState(false);
-  const [gSelMode, setGSelMode]       = useState("all");
-  const [gSelSingle, setGSelSingle]   = useState(null);
-  const [gSelFrom, setGSelFrom]       = useState(null);
-  const [gSelTo, setGSelTo]           = useState(null);
-  const [gAnimKey, setGAnimKey]       = useState(0);
-
+  // ── Grammar state ────────────────────────────────────────────────────────
+  const [gDeck, setGDeck]         = useState([]);
+  const [gIdx, setGIdx]           = useState(0);
+  const [gFlipped, setGFlipped]   = useState(false);
+  const [gAnimKey, setGAnimKey]   = useState(0);
+  const [gSelMode, setGSelMode]   = useState("all");
+  const [gSelSingle, setGSelSingle] = useState(null);
+  const [gSelFrom, setGSelFrom]   = useState(null);
+  const [gSelTo, setGSelTo]       = useState(null);
 
   useEffect(() => {
     const s = load();
@@ -628,12 +621,10 @@ export default function HanziQuiz() {
 
   useEffect(() => { save({ stats }); }, [stats]);
 
-  const card     = deck[idx];
-  const total    = deck.length;
-  const progress = total > 0 ? (idx / total) * 100 : 0;
+  // ── Vocab helpers ────────────────────────────────────────────────────────
 
   function getSelectedLessons() {
-    if (selMode === "all")    return LESSONS;
+    if (selMode === "all") return LESSONS;
     if (selMode === "single") return selSingle != null ? [selSingle] : [];
     if (selMode === "range") {
       if (selFrom == null || selTo == null) return [];
@@ -645,71 +636,58 @@ export default function HanziQuiz() {
 
   const selectedLessons = getSelectedLessons();
   const selectedVocab   = VOCAB.filter(v => selectedLessons.includes(v.lesson));
+  const card            = deck[idx];
+  const total           = deck.length;
+  const progress        = total > 0 ? (idx / total) * 100 : 0;
 
   function lessonLabel() {
     if (selMode === "all") return "All Lessons";
     if (selMode === "single" && selSingle) return `Lesson ${selSingle}`;
     if (selMode === "range" && selFrom && selTo)
-      return `Lessons ${Math.min(selFrom,selTo)}–${Math.max(selFrom,selTo)}`;
+      return `Lessons ${Math.min(selFrom,selTo)}-${Math.max(selFrom,selTo)}`;
     return "";
   }
 
   function startQuiz() {
     if (selectedVocab.length === 0) return;
     setDeck(shuffle(selectedVocab));
-    setIdx(0); setLevel(0);
-    setSRight(0); setSWrong(0);
-    setWrongThisCard(false);
-    setConfirming(false);
-    setAnimKey(k => k + 1);
-    setShowStopConfirm(false);
+    setIdx(0); setLevel(0); setSRight(0); setSWrong(0);
+    setWrongThisCard(false); setConfirming(false);
+    setAnimKey(k => k + 1); setShowStopConfirm(false);
     setScreen("quiz");
-  }
-
-  // ── FIX 1 core: record wrong at CHARACTER level, only once per card ──────
-  function recordWrongForCard(hanzi) {
-    if (wrongThisCard) return; // already counted this card
-    setWrongThisCard(true);
-    setSWrong(w => w + 1);
-    setStats(s => {
-      const p = s[hanzi] || { wrong: 0, seen: 0, wrongCards: [] };
-      return {
-        ...s,
-        [hanzi]: {
-          ...p,
-          wrong: p.wrong + 1,
-          // keep last 20 wrong timestamps for history
-          wrongCards: [...(p.wrongCards || []), Date.now()].slice(-20),
-        },
-      };
-    });
-  }
-
-  function recordSeen(hanzi) {
-    setStats(s => {
-      const p = s[hanzi] || { wrong: 0, seen: 0, wrongCards: [] };
-      return { ...s, [hanzi]: { ...p, seen: p.seen + 1 } };
-    });
   }
 
   function goNextCard() {
     if (idx + 1 >= deck.length) { setScreen("done"); return; }
     setIdx(i => i + 1);
-    setLevel(0);
-    setWrongThisCard(false);
-    setConfirming(false);
+    setLevel(0); setWrongThisCard(false); setConfirming(false);
     setAnimKey(k => k + 1);
+  }
+
+  function recordSeen(hanzi) {
+    setStats(s => {
+      const p = s[hanzi] || { wrong:0, seen:0, wrongCards:[] };
+      return { ...s, [hanzi]: { ...p, seen: p.seen + 1 } };
+    });
+  }
+
+  function recordWrongForCard(hanzi) {
+    if (wrongThisCard) return;
+    setWrongThisCard(true);
+    setSWrong(w => w + 1);
+    setStats(s => {
+      const p = s[hanzi] || { wrong:0, seen:0, wrongCards:[] };
+      return { ...s, [hanzi]: { ...p, wrong: p.wrong + 1,
+        wrongCards: [...(p.wrongCards || []), Date.now()].slice(-20) } };
+    });
   }
 
   function handleRight() {
     if (level === 0) {
-      // Answered at hanzi level — count as correct, show confirmation
       recordSeen(card.hanzi);
       setSRight(r => r + 1);
       setConfirming(true);
     } else {
-      // Hints were already shown — card was already counted as wrong.
-      // Just move on, no correct score added.
       recordSeen(card.hanzi);
       goNextCard();
     }
@@ -723,24 +701,18 @@ export default function HanziQuiz() {
   function handleWrong() {
     setShake(true);
     setTimeout(() => setShake(false), 450);
-
     if (level === 0) {
-      // First wrong tap: reveal pinyin, mark card as wrong
       recordWrongForCard(card.hanzi);
       setLevel(1);
     } else if (level === 1) {
-      // Second wrong tap: reveal english — don't add another wrong count
       setLevel(2);
     } else {
-      // Already fully revealed: move on, record seen
       recordSeen(card.hanzi);
       goNextCard();
     }
   }
 
-  // ── FIX 2: Stop mid-session — saves all progress up to current card ──────
   function handleStop() {
-    // Record current card as seen (partially attempted)
     if (card) recordSeen(card.hanzi);
     setShowStopConfirm(false);
     setScreen("done");
@@ -751,11 +723,25 @@ export default function HanziQuiz() {
     setStats({});
   }
 
+  const accuracy = (sRight + sWrong) > 0
+    ? Math.round((sRight / (sRight + sWrong)) * 100) : 0;
+
+  const statsList = VOCAB.map(v => ({
+    ...v, wrong: stats[v.hanzi]?.wrong || 0, seen: stats[v.hanzi]?.seen || 0,
+  })).sort((a, b) => b.wrong - a.wrong);
+
+  const chartData = LESSONS.map(l => ({
+    name: `L${l}`,
+    wrong: VOCAB.filter(v => v.lesson === l).reduce((a, v) => a + (stats[v.hanzi]?.wrong || 0), 0),
+    words: VOCAB.filter(v => v.lesson === l).length,
+  }));
+
   // ── Grammar helpers ──────────────────────────────────────────────────────
+
   const G_LESSONS = [...new Set(GRAMMAR.map(g => g.lesson))].sort((a,b) => a-b);
 
   function getGSelectedLessons() {
-    if (gSelMode === "all")    return G_LESSONS;
+    if (gSelMode === "all") return G_LESSONS;
     if (gSelMode === "single") return gSelSingle != null ? [gSelSingle] : [];
     if (gSelMode === "range") {
       if (gSelFrom == null || gSelTo == null) return [];
@@ -771,177 +757,175 @@ export default function HanziQuiz() {
   function startGrammar() {
     if (gSelectedCards.length === 0) return;
     setGDeck(shuffle(gSelectedCards));
-    setGIdx(0);
-    setGFlipped(false);
-    setGAnimKey(k => k + 1);
+    setGIdx(0); setGFlipped(false); setGAnimKey(k => k + 1);
     setScreen("gquiz");
   }
 
   function gNext() {
     if (gIdx + 1 >= gDeck.length) { setScreen("gdone"); return; }
-    setGIdx(i => i + 1);
-    setGFlipped(false);
-    setGAnimKey(k => k + 1);
+    setGIdx(i => i + 1); setGFlipped(false); setGAnimKey(k => k + 1);
   }
 
   function gPrev() {
     if (gIdx === 0) return;
-    setGIdx(i => i - 1);
-    setGFlipped(false);
-    setGAnimKey(k => k + 1);
+    setGIdx(i => i - 1); setGFlipped(false); setGAnimKey(k => k + 1);
   }
 
-  const statsList = VOCAB.map(v => ({
-    ...v,
-    wrong: stats[v.hanzi]?.wrong || 0,
-    seen:  stats[v.hanzi]?.seen  || 0,
-  })).sort((a, b) => b.wrong - a.wrong);
+  // ── Shared sub-components ────────────────────────────────────────────────
 
-  const chartData = LESSONS.map(l => ({
-    name: `L${l}`,
-    wrong: VOCAB.filter(v => v.lesson === l).reduce((a, v) => a + (stats[v.hanzi]?.wrong || 0), 0),
-    words: VOCAB.filter(v => v.lesson === l).length,
-  }));
-
-  function startGrammar() {
-    if (gSelectedCards.length === 0) return;
-    setGDeck(shuffle(gSelectedCards));
-    setGIdx(0);
-    setGFlipped(false);
-    setGAnimKey(k => k + 1);
-    setScreen("gquiz");
-  }
-
-  function gNext() {
-    if (gIdx + 1 >= gDeck.length) { setScreen("gdone"); return; }
-    setGIdx(i => i + 1);
-    setGFlipped(false);
-    setGAnimKey(k => k + 1);
-  }
-
-  function gPrev() {
-    if (gIdx === 0) return;
-    setGIdx(i => i - 1);
-    setGFlipped(false);
-    setGAnimKey(k => k + 1);
-  }
-
-  const accuracy = (sRight + sWrong) > 0
-    ? Math.round((sRight / (sRight + sWrong)) * 100) : 0;
-
-  function LessonBtn({ lesson, active, onClick }) {
+  function LessonBtn({ lesson, active, onClick, color }) {
     const count = VOCAB.filter(v => v.lesson === lesson).length;
+    const ac = color || "#2d5a27";
     return (
       <button onClick={onClick} style={{
-        border: active ? "2px solid #2d5a27" : "1.5px solid #ddd5c0",
-        background: active ? "#2d5a27" : "#fff",
-        color: active ? "#f5f0e8" : "#5a4a30",
-        borderRadius: 12, padding: "10px 6px", cursor: "pointer",
-        fontFamily: "'Crimson Pro',serif", transition: "all .15s",
-        display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+        border: active ? `2px solid ${ac}` : "1.5px solid #ddd5c0",
+        background: active ? ac : "#fff", color: active ? "#f5f0e8" : "#5a4a30",
+        borderRadius:12, padding:"10px 6px", cursor:"pointer",
+        fontFamily:"'Crimson Pro',serif", transition:"all .15s",
+        display:"flex", flexDirection:"column", alignItems:"center", gap:2,
       }}>
-        <span style={{ fontSize: 14, fontWeight: 600 }}>L{lesson}</span>
-        <span style={{ fontSize: 10, opacity: .7 }}>{count}w</span>
+        <span style={{ fontSize:13, fontWeight:600 }}>L{lesson}</span>
+        <span style={{ fontSize:10, opacity:.7 }}>{count}w</span>
       </button>
     );
   }
 
-  return (
-    <div style={{
-      minHeight: "100vh", background: "#f5f0e8",
-      fontFamily: "'Noto Serif SC','Georgia',serif",
-      display: "flex", flexDirection: "column", alignItems: "center",
-      padding: "24px 18px 64px", position: "relative", overflow: "hidden",
-    }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes popIn{0%{transform:scale(.88);opacity:0}70%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
-        @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
-        @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-        .fade-up{animation:fadeUp .35s ease forwards}
-        .pop-in{animation:popIn .32s ease forwards}
-        .shake{animation:shake .42s ease}
-        .slide-down{animation:slideDown .28s ease forwards}
-        .btn-green{background:#2d5a27;color:#f5f0e8;border:none;border-radius:14px;
-          padding:16px 28px;font-family:'Crimson Pro',serif;font-size:18px;font-weight:600;
-          cursor:pointer;transition:all .2s;letter-spacing:.03em;box-shadow:0 4px 16px #2d5a2728}
-        .btn-green:hover{background:#234a1e;transform:translateY(-2px)}
-        .btn-green:active{transform:translateY(0)}
-        .btn-green:disabled{opacity:.35;cursor:not-allowed;transform:none}
-        .btn-red{background:#fff;color:#8b2020;border:2px solid #c8a8a8;border-radius:14px;
-          padding:16px 28px;font-family:'Crimson Pro',serif;font-size:18px;font-weight:600;
-          cursor:pointer;transition:all .2s}
-        .btn-red:hover{background:#fdf0f0;border-color:#8b2020;transform:translateY(-2px)}
-        .btn-stop{background:#fff;color:#8b4a10;border:2px solid #e8c8a0;border-radius:14px;
-          padding:12px 20px;font-family:'Crimson Pro',serif;font-size:15px;font-weight:600;
-          cursor:pointer;transition:all .2s;width:100%}
-        .btn-stop:hover{background:#fdf5ee;border-color:#c87830;transform:translateY(-1px)}
-        .btn-outline{background:none;border:1.5px solid #8b7355;color:#5a4a30;border-radius:10px;
-          padding:11px 22px;font-family:'Crimson Pro',serif;font-size:15px;cursor:pointer;transition:all .2s}
-        .btn-outline:hover{background:#e8e0d0;transform:translateY(-1px)}
-        .mode-btn{border:1.5px solid #ddd5c0;background:#fff;color:#5a4a30;border-radius:10px;
-          padding:9px 14px;font-family:'Crimson Pro',serif;font-size:13px;cursor:pointer;
-          transition:all .15s;white-space:nowrap}
-        .mode-btn.sel{border-color:#2d5a27;background:#f0f7ef;color:#2d5a27;font-weight:600}
-        .stab{background:none;border:none;cursor:pointer;font-family:'Crimson Pro',serif;
-          font-size:14px;color:#8b7355;padding:7px 14px;border-bottom:2px solid transparent;transition:all .2s}
-        .stab.on{color:#2d3a1e;border-bottom-color:#2d5a27}
-        ::-webkit-scrollbar{width:3px}
-        ::-webkit-scrollbar-thumb{background:#c8b898;border-radius:2px}
-      `}</style>
+  function GLessonBtn({ lesson, active, onClick }) {
+    const count = GRAMMAR.filter(g => g.lesson === lesson).length;
+    return (
+      <button onClick={onClick} style={{
+        border: active ? "2px solid #8b6914" : "1.5px solid #ddd5c0",
+        background: active ? "#8b6914" : "#fff", color: active ? "#fff" : "#5a4a30",
+        borderRadius:12, padding:"10px 6px", cursor:"pointer",
+        fontFamily:"'Crimson Pro',serif", transition:"all .15s",
+        display:"flex", flexDirection:"column", alignItems:"center", gap:2,
+      }}>
+        <span style={{ fontSize:13, fontWeight:600 }}>L{lesson}</span>
+        <span style={{ fontSize:10, opacity:.7 }}>{count}c</span>
+      </button>
+    );
+  }
 
-      {/* BG decorative */}
+  // ── Styles ───────────────────────────────────────────────────────────────
+
+  const css = `
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes popIn{0%{transform:scale(.88);opacity:0}70%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .35s ease forwards}
+    .pop-in{animation:popIn .32s ease forwards}
+    .shake{animation:shake .42s ease}
+    .slide-down{animation:slideDown .28s ease forwards}
+    .btn-green{background:#2d5a27;color:#f5f0e8;border:none;border-radius:14px;
+      padding:16px 28px;font-family:'Crimson Pro',serif;font-size:18px;font-weight:600;
+      cursor:pointer;transition:all .2s;box-shadow:0 4px 16px #2d5a2728}
+    .btn-green:hover{background:#234a1e;transform:translateY(-2px)}
+    .btn-green:active{transform:translateY(0)}
+    .btn-green:disabled{opacity:.35;cursor:not-allowed;transform:none}
+    .btn-red{background:#fff;color:#8b2020;border:2px solid #c8a8a8;border-radius:14px;
+      padding:16px 28px;font-family:'Crimson Pro',serif;font-size:18px;font-weight:600;
+      cursor:pointer;transition:all .2s}
+    .btn-red:hover{background:#fdf0f0;border-color:#8b2020;transform:translateY(-2px)}
+    .btn-gold{background:#8b6914;color:#fff;border:none;border-radius:14px;
+      padding:16px 28px;font-family:'Crimson Pro',serif;font-size:18px;font-weight:600;
+      cursor:pointer;transition:all .2s;box-shadow:0 4px 16px #8b691428}
+    .btn-gold:hover{background:#7a5c10;transform:translateY(-2px)}
+    .btn-gold:disabled{opacity:.35;cursor:not-allowed;transform:none}
+    .btn-stop{background:#fff;color:#8b4a10;border:2px solid #e8c8a0;border-radius:14px;
+      padding:12px 20px;font-family:'Crimson Pro',serif;font-size:15px;font-weight:600;
+      cursor:pointer;transition:all .2s;width:100%}
+    .btn-stop:hover{background:#fdf5ee;border-color:#c87830;transform:translateY(-1px)}
+    .btn-outline{background:none;border:1.5px solid #8b7355;color:#5a4a30;border-radius:10px;
+      padding:11px 22px;font-family:'Crimson Pro',serif;font-size:15px;cursor:pointer;transition:all .2s}
+    .btn-outline:hover{background:#e8e0d0;transform:translateY(-1px)}
+    .mode-btn{border:1.5px solid #ddd5c0;background:#fff;color:#5a4a30;border-radius:10px;
+      padding:9px 14px;font-family:'Crimson Pro',serif;font-size:13px;cursor:pointer;
+      transition:all .15s;white-space:nowrap}
+    .mode-btn.sel{border-color:#2d5a27;background:#f0f7ef;color:#2d5a27;font-weight:600}
+    .mode-btn.gsel{border-color:#8b6914;background:#fef9ec;color:#8b6914;font-weight:600}
+    .stab{background:none;border:none;cursor:pointer;font-family:'Crimson Pro',serif;
+      font-size:14px;color:#8b7355;padding:7px 14px;border-bottom:2px solid transparent;transition:all .2s}
+    .stab.on{color:#2d3a1e;border-bottom-color:#2d5a27}
+    ::-webkit-scrollbar{width:3px}
+    ::-webkit-scrollbar-thumb{background:#c8b898;border-radius:2px}
+  `;
+
+  const pageStyle = {
+    minHeight:"100vh", background:"#f5f0e8",
+    fontFamily:"'Noto Serif SC','Georgia',serif",
+    display:"flex", flexDirection:"column", alignItems:"center",
+    padding:"24px 18px 64px", position:"relative", overflow:"hidden",
+  };
+
+  const sectionStyle = { width:"100%", maxWidth:460, position:"relative", zIndex:1 };
+
+  const labelStyle = {
+    fontFamily:"'Crimson Pro',serif", fontSize:11,
+    color:"#8b7355", letterSpacing:".18em",
+  };
+
+  // ── RENDER ───────────────────────────────────────────────────────────────
+
+  return (
+    <div style={pageStyle}>
+      <style>{css}</style>
+
+      {/* BG decorative characters */}
       <div style={{ position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0 }}>
         {["字","学","文","语","词","汉","话","读"].map((c, i) => (
-          <div key={i} style={{ position:"absolute", fontSize:`${110+i*28}px`, color:"#2d3a1e07",
+          <div key={i} style={{
+            position:"absolute", fontSize:`${110+i*28}px`, color:"#2d3a1e07",
             fontWeight:700, left:`${[5,20,45,70,85,10,55,75][i]}%`,
-            top:`${[10,60,20,70,40,85,50,15][i]}%`, transform:"rotate(-15deg)", userSelect:"none" }}>
-            {c}
-          </div>
+            top:`${[10,60,20,70,40,85,50,15][i]}%`,
+            transform:"rotate(-15deg)", userSelect:"none",
+          }}>{c}</div>
         ))}
       </div>
 
-      <div style={{ width:"100%", maxWidth:460, position:"relative", zIndex:1 }}>
+      <div style={sectionStyle}>
 
-        {/* ══ HOME ══ */}
+        {/* ═══════════════════════════════════════════════════════ HOME */}
         {screen === "home" && (
-          <div className="fade-up" style={{ textAlign:"center", paddingSelTop:28 }}>
+          <div className="fade-up" style={{ textAlign:"center", paddingTop:28 }}>
             <div style={{ fontSize:52, marginBottom:4 }}>汉字</div>
             <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#8b7355",
                           letterSpacing:".25em", marginBottom:4 }}>HÀNZÌ STUDY APP</div>
             <div style={{ width:36, height:2, background:"#8b7355", margin:"12px auto 28px" }} />
 
-            {/* Mode chooser */}
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:20 }}>
-              <button onClick={() => setScreen("vocab")}
-                      style={{ background:"#fff", border:"2px solid #2d5a27", borderRadius:20,
-                               padding:"24px 12px", cursor:"pointer", transition:"all .2s" }}
-                      onMouseOver={e=>e.currentTarget.style.background="#f0f7ef"}
-                      onMouseOut={e=>e.currentTarget.style.background="#fff"}>
+              <button onClick={() => setScreen("vocab")} style={{
+                background:"#fff", border:"2px solid #2d5a27", borderRadius:20,
+                padding:"24px 12px", cursor:"pointer", transition:"all .2s",
+              }}>
                 <div style={{ fontSize:36, marginBottom:8 }}>📚</div>
                 <div style={{ fontFamily:"'Noto Serif SC'", fontSize:15, fontWeight:600,
                               color:"#2d3a1e", marginBottom:4 }}>词汇</div>
                 <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#2d5a27" }}>
                   Vocabulary
                 </div>
-                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                              marginTop:4 }}>{VOCAB.length} words · L1–25</div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11,
+                              color:"#8b7355", marginTop:4 }}>
+                  {VOCAB.length} words · L1-{LESSONS[LESSONS.length-1]}
+                </div>
               </button>
-              <button onClick={() => setScreen("gselect")}
-                      style={{ background:"#fff", border:"2px solid #8b6914", borderRadius:20,
-                               padding:"24px 12px", cursor:"pointer", transition:"all .2s" }}
-                      onMouseOver={e=>e.currentTarget.style.background="#fef9ec"}
-                      onMouseOut={e=>e.currentTarget.style.background="#fff"}>
+
+              <button onClick={() => setScreen("gselect")} style={{
+                background:"#fff", border:"2px solid #8b6914", borderRadius:20,
+                padding:"24px 12px", cursor:"pointer", transition:"all .2s",
+              }}>
                 <div style={{ fontSize:36, marginBottom:8 }}>📖</div>
                 <div style={{ fontFamily:"'Noto Serif SC'", fontSize:15, fontWeight:600,
                               color:"#2d3a1e", marginBottom:4 }}>语法</div>
                 <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#8b6914" }}>
                   Grammar
                 </div>
-                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                              marginTop:4 }}>{GRAMMAR.length} cards · L1–30</div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11,
+                              color:"#8b7355", marginTop:4 }}>
+                  {GRAMMAR.length} cards · L1-30
+                </div>
               </button>
             </div>
 
@@ -952,24 +936,21 @@ export default function HanziQuiz() {
           </div>
         )}
 
-        {/* ══ VOCAB HOME ══ */}
+        {/* ═══════════════════════════════════════════════════════ VOCAB HOME */}
         {screen === "vocab" && (
-          <div className="fade-up" style={{ textAlign:"center", paddingSelTop:20 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20,
-                          textAlign:"left" }}>
-              <button onClick={() => setScreen("home")}
-                      style={{ background:"none", border:"none", color:"#8b7355",
-                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
-                ← Back
-              </button>
-              <div style={{ fontFamily:"'Noto Serif SC'", fontSize:18, fontWeight:600,
-                            color:"#2d3a1e" }}>词汇 · Vocabulary</div>
+          <div className="fade-up">
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
+              <button onClick={() => setScreen("home")} style={{
+                background:"none", border:"none", color:"#8b7355",
+                fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer",
+              }}>← Back</button>
+              <div style={{ fontFamily:"'Noto Serif SC'", fontSize:18,
+                            fontWeight:600, color:"#2d3a1e" }}>词汇 · Vocabulary</div>
             </div>
 
             <div style={{ background:"#fff", border:"1px solid #ddd5c0", borderRadius:20,
-                          padding:"18px", marginBottom:16, boxShadow:"0 4px 24px #2d3a1e0a" }}>
-              <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                            letterSpacing:".2em", marginBottom:12 }}>
+                          padding:18, marginBottom:16, boxShadow:"0 4px 24px #2d3a1e0a" }}>
+              <div style={{ ...labelStyle, marginBottom:12 }}>
                 {LESSONS.length} LESSONS · {VOCAB.length} WORDS
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6 }}>
@@ -980,16 +961,18 @@ export default function HanziQuiz() {
                   const seen   = VOCAB.filter(v => v.lesson === l)
                     .filter(v => (stats[v.hanzi]?.seen || 0) > 0).length;
                   return (
-                    <div key={l} style={{ background: seen===count ? "#f0f7ef" : "#f5f0e8",
-                                          border:`1px solid ${seen===count?"#c8ddc4":"#e8e0d0"}`,
-                                          borderRadius:10, padding:"8px 4px", textAlign:"center" }}>
+                    <div key={l} style={{
+                      background: seen===count ? "#f0f7ef" : "#f5f0e8",
+                      border:`1px solid ${seen===count ? "#c8ddc4" : "#e8e0d0"}`,
+                      borderRadius:10, padding:"8px 4px", textAlign:"center",
+                    }}>
                       <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:700,
                                     fontSize:12, color:"#2d3a1e" }}>L{l}</div>
                       <div style={{ fontSize:10, color:"#8b7355" }}>{count}w</div>
                       {wrongs > 0
-                        ? <div style={{ fontSize:10, color:"#8b2020" }}>✗{wrongs}</div>
+                        ? <div style={{ fontSize:10, color:"#8b2020" }}>&#10007;{wrongs}</div>
                         : seen > 0
-                        ? <div style={{ fontSize:10, color:"#2d5a27" }}>✓</div>
+                        ? <div style={{ fontSize:10, color:"#2d5a27" }}>&#10003;</div>
                         : <div style={{ fontSize:10, color:"#c8b898" }}>new</div>}
                     </div>
                   );
@@ -997,8 +980,8 @@ export default function HanziQuiz() {
               </div>
             </div>
 
-            <button className="btn-green" style={{ width:"100%", fontSize:18, padding:"16px",
-                                                    marginBottom:10 }}
+            <button className="btn-green" style={{ width:"100%", fontSize:18,
+                                                    padding:"16px", marginBottom:10 }}
                     onClick={() => setScreen("select")}>
               开始练习 · Start Practice
             </button>
@@ -1006,29 +989,22 @@ export default function HanziQuiz() {
                     onClick={() => setScreen("stats")}>
               查看统计 · View Stats
             </button>
-            <div style={{ marginTop:22, fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
-                          color:"#b0a08a", fontSize:13, lineHeight:1.9 }}>
-              汉字 → ✗ Wrong → pīnyīn shown<br/>
-              → ✗ Wrong → English shown → ✗ → next card
-            </div>
           </div>
         )}
 
+        {/* ═══════════════════════════════════════════════════════ LESSON SELECT */}
         {screen === "select" && (
           <div className="fade-up">
             <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
-              <button onClick={() => setScreen("home")}
-                      style={{ background:"none", border:"none", color:"#8b7355",
-                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
-                ← Back
-              </button>
-              <div style={{ fontFamily:"'Noto Serif SC'", fontSize:17, fontWeight:600, color:"#2d3a1e" }}>
-                Choose Lessons
-              </div>
+              <button onClick={() => setScreen("vocab")} style={{
+                background:"none", border:"none", color:"#8b7355",
+                fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer",
+              }}>← Back</button>
+              <div style={{ fontFamily:"'Noto Serif SC'", fontSize:17,
+                            fontWeight:600, color:"#2d3a1e" }}>Choose Lessons</div>
             </div>
 
-            <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                          letterSpacing:".18em", marginBottom:10 }}>PRACTICE MODE</div>
+            <div style={{ ...labelStyle, marginBottom:10 }}>PRACTICE MODE</div>
             <div style={{ display:"flex", gap:8, marginBottom:20, flexWrap:"wrap" }}>
               {[["all","All Lessons"],["single","One Lesson"],["range","Lesson Range"]].map(([m,lbl]) => (
                 <button key={m} className={`mode-btn ${selMode===m?"sel":""}`}
@@ -1044,15 +1020,14 @@ export default function HanziQuiz() {
                               color:"#2d3a1e", fontWeight:600 }}>All {VOCAB.length} words</div>
                 <div style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
                               fontSize:14, color:"#8b7355", marginTop:4 }}>
-                  Lessons {LESSONS[0]}–{LESSONS[LESSONS.length-1]}
+                  Lessons {LESSONS[0]}-{LESSONS[LESSONS.length-1]}
                 </div>
               </div>
             )}
 
             {selMode === "single" && (
               <div style={{ marginBottom:16 }}>
-                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                              letterSpacing:".18em", marginBottom:10 }}>SELECT LESSON</div>
+                <div style={{ ...labelStyle, marginBottom:10 }}>SELECT LESSON</div>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6 }}>
                   {LESSONS.map(l => (
                     <LessonBtn key={l} lesson={l} active={selSingle===l}
@@ -1073,8 +1048,7 @@ export default function HanziQuiz() {
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
                   {[["FROM", selFrom, setSelFrom],["TO", selTo, setSelTo]].map(([lbl,val,setter]) => (
                     <div key={lbl}>
-                      <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                                    letterSpacing:".18em", marginBottom:8 }}>{lbl} LESSON</div>
+                      <div style={{ ...labelStyle, marginBottom:8 }}>{lbl} LESSON</div>
                       <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:5 }}>
                         {LESSONS.map(l => (
                           <LessonBtn key={l} lesson={l} active={val===l}
@@ -1090,7 +1064,7 @@ export default function HanziQuiz() {
                                 fontFamily:"'Crimson Pro',serif" }}>
                     <span style={{ color:"#2d5a27", fontWeight:600 }}>{selectedVocab.length} words</span>
                     <span style={{ color:"#8b7355" }}>
-                      {" "}· Lessons {Math.min(selFrom,selTo)}–{Math.max(selFrom,selTo)}
+                      {" "}· Lessons {Math.min(selFrom,selTo)}-{Math.max(selFrom,selTo)}
                     </span>
                   </div>
                 )}
@@ -1100,9 +1074,8 @@ export default function HanziQuiz() {
             {selectedVocab.length > 0 && (
               <div style={{ background:"#fff", border:"1px solid #ddd5c0", borderRadius:14,
                             padding:"12px 14px", marginBottom:16 }}>
-                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                              letterSpacing:".18em", marginBottom:8 }}>
-                  PREVIEW — {selectedVocab.length} WORDS
+                <div style={{ ...labelStyle, marginBottom:8 }}>
+                  PREVIEW - {selectedVocab.length} WORDS
                 </div>
                 <div style={{ display:"flex", flexWrap:"wrap", gap:5, maxHeight:75, overflowY:"auto" }}>
                   {selectedVocab.map((v,i) => (
@@ -1124,34 +1097,32 @@ export default function HanziQuiz() {
           </div>
         )}
 
-        {/* ══ QUIZ ══ */}
+        {/* ═══════════════════════════════════════════════════════ QUIZ */}
         {screen === "quiz" && card && (
           <div>
             {/* Stop confirm modal */}
             {showStopConfirm && (
-              <div style={{ position:"fixed", inset:0, background:"#00000066", display:"flex",
-                            alignItems:"center", justifyContent:"center", zIndex:100, padding:24 }}>
+              <div style={{ position:"fixed", inset:0, background:"#00000066",
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            zIndex:100, padding:24 }}>
                 <div className="fade-up" style={{ background:"#fff", border:"1px solid #ddd5c0",
                      borderRadius:20, padding:28, width:"100%", maxWidth:340, textAlign:"center" }}>
-                  <div style={{ fontSize:32, marginBottom:8 }}>⏹</div>
+                  <div style={{ fontSize:32, marginBottom:8 }}>&#9209;</div>
                   <div style={{ fontFamily:"'Noto Serif SC'", fontSize:18, color:"#2d3a1e",
                                 fontWeight:600, marginBottom:8 }}>Stop Practice?</div>
                   <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:14, color:"#8b7355",
                                 marginBottom:20, lineHeight:1.6 }}>
                     Your progress so far will be saved.<br/>
-                    <strong style={{ color:"#2d5a27" }}>✓ {sRight} correct</strong>
+                    <strong style={{ color:"#2d5a27" }}>&#10003; {sRight} correct</strong>
                     {"  "}
-                    <strong style={{ color:"#8b2020" }}>✗ {sWrong} wrong</strong>
-                    {" "}out of {idx} cards answered.
+                    <strong style={{ color:"#8b2020" }}>&#10007; {sWrong} wrong</strong>
+                    {" "}out of {idx} answered.
                   </div>
                   <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-                    <button className="btn-outline" onClick={() => setShowStopConfirm(false)}>
-                      Keep Going
-                    </button>
-                    <button className="btn-stop" onClick={handleStop}
-                            style={{ borderRadius:10, fontSize:15 }}>
-                      Stop & Save
-                    </button>
+                    <button className="btn-outline"
+                            onClick={() => setShowStopConfirm(false)}>Keep Going</button>
+                    <button className="btn-stop" style={{ borderRadius:10, fontSize:15 }}
+                            onClick={handleStop}>Stop &amp; Save</button>
                   </div>
                 </div>
               </div>
@@ -1159,11 +1130,10 @@ export default function HanziQuiz() {
 
             <div style={{ display:"flex", justifyContent:"space-between",
                           alignItems:"center", marginBottom:10 }}>
-              <button onClick={() => setScreen("select")}
-                      style={{ background:"none", border:"none", color:"#8b7355",
-                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
-                ← Back
-              </button>
+              <button onClick={() => setScreen("select")} style={{
+                background:"none", border:"none", color:"#8b7355",
+                fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer",
+              }}>← Back</button>
               <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#8b7355" }}>
                 {idx + 1} / {total}
               </div>
@@ -1183,49 +1153,46 @@ export default function HanziQuiz() {
               </span>
             </div>
 
-            {/* Card */}
+            {/* Flashcard */}
             <div key={animKey}
                  className={`pop-in ${shake ? "shake" : ""}`}
-                 style={{ background: confirming ? "#f0f7ef" : "#fff",
-                          border: confirming ? "2px solid #2d5a27" : "1px solid #ddd5c0",
-                          borderRadius:24, boxShadow:"0 8px 40px #2d3a1e0d", padding:"40px 24px",
-                          textAlign:"center", minHeight:230,
-                          display:"flex", flexDirection:"column",
-                          alignItems:"center", justifyContent:"center",
-                          gap:14, marginBottom:12, transition:"background .25s, border .25s" }}>
-
-              {/* Hanzi — always shown */}
-              <div style={{ fontSize: card.hanzi.length > 4 ? 48 : card.hanzi.length > 2 ? 62 : 78,
-                            lineHeight:1.1,
-                            color: confirming ? "#2d5a27" : "#1a2410",
-                            textShadow:"0 2px 8px #2d3a1e12",
-                            transition:"color .25s" }}>
+                 style={{
+                   background: confirming ? "#f0f7ef" : "#fff",
+                   border: confirming ? "2px solid #2d5a27" : "1px solid #ddd5c0",
+                   borderRadius:24, boxShadow:"0 8px 40px #2d3a1e0d",
+                   padding:"40px 24px", textAlign:"center", minHeight:230,
+                   display:"flex", flexDirection:"column", alignItems:"center",
+                   justifyContent:"center", gap:14, marginBottom:12,
+                   transition:"background .25s, border .25s",
+                 }}>
+              <div style={{
+                fontSize: card.hanzi.length > 4 ? 48 : card.hanzi.length > 2 ? 62 : 78,
+                lineHeight:1.1, color: confirming ? "#2d5a27" : "#1a2410",
+                textShadow:"0 2px 8px #2d3a1e12", transition:"color .25s",
+              }}>
                 {card.hanzi}
               </div>
-
-              {/* Pinyin — shown when wrong revealed OR confirming */}
               {(level >= 1 || confirming) && (
-                <div className="slide-down"
-                     style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
-                              fontSize:24, color:"#2d5a27", letterSpacing:".04em" }}>
+                <div className="slide-down" style={{
+                  fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                  fontSize:24, color:"#2d5a27", letterSpacing:".04em",
+                }}>
                   {card.pinyin}
                 </div>
               )}
-
-              {/* English — shown when wrong revealed OR confirming */}
               {(level >= 2 || confirming) && (
-                <div className="slide-down"
-                     style={{ fontFamily:"'Crimson Pro',serif", fontSize:18, color:"#5a4a30" }}>
+                <div className="slide-down" style={{
+                  fontFamily:"'Crimson Pro',serif", fontSize:18, color:"#5a4a30",
+                }}>
                   {card.english}
                 </div>
               )}
-
-              {/* Status label */}
               {confirming && (
-                <div className="slide-down"
-                     style={{ fontSize:11, color:"#2d5a27", letterSpacing:".15em",
-                              fontFamily:"'Crimson Pro',serif", fontWeight:600 }}>
-                  ✓ CORRECT — CHECK YOUR ANSWER
+                <div className="slide-down" style={{
+                  fontSize:11, color:"#2d5a27", letterSpacing:".15em",
+                  fontFamily:"'Crimson Pro',serif", fontWeight:600,
+                }}>
+                  &#10003; CORRECT - CHECK YOUR ANSWER
                 </div>
               )}
               {!confirming && level > 0 && (
@@ -1236,23 +1203,20 @@ export default function HanziQuiz() {
               )}
             </div>
 
-            {/* Past wrong badge */}
             {!confirming && (stats[card.hanzi]?.wrong || 0) > 0 && (
               <div style={{ textAlign:"center", marginBottom:10 }}>
-                <span style={{ background:"#fdf0f0", border:"1px solid #e8c8c8", borderRadius:999,
-                               padding:"3px 12px", fontSize:12, color:"#8b2020",
-                               fontFamily:"'Crimson Pro',serif" }}>
-                  ✗ Missed {stats[card.hanzi].wrong}× total
+                <span style={{ background:"#fdf0f0", border:"1px solid #e8c8c8",
+                               borderRadius:999, padding:"3px 12px", fontSize:12,
+                               color:"#8b2020", fontFamily:"'Crimson Pro',serif" }}>
+                  &#10007; Missed {stats[card.hanzi].wrong}x total
                 </span>
               </div>
             )}
 
-            {/* Action buttons — swap to confirm mode after Got it */}
             {confirming ? (
-              <button className="btn-green" style={{ width:"100%", fontSize:19,
-                                                     padding:"18px", marginBottom:10 }}
+              <button className="btn-green" style={{ width:"100%", fontSize:19, padding:"18px" }}
                       onClick={handleConfirmNext}>
-                Next → 下一个
+                Next &#8594; 下一个
               </button>
             ) : (
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
@@ -1265,32 +1229,29 @@ export default function HanziQuiz() {
               </div>
             )}
 
-            {/* Stop button — hidden during confirmation */}
             {!confirming && (
               <button className="btn-stop" onClick={() => setShowStopConfirm(true)}>
-                ⏹ Stop &amp; Save Progress
+                &#9209; Stop &amp; Save Progress
               </button>
             )}
 
-            {/* Session counters */}
             <div style={{ display:"flex", justifyContent:"center", gap:24, marginTop:12,
                           fontFamily:"'Crimson Pro',serif", fontSize:14, color:"#8b7355" }}>
-              <span style={{ color:"#2d5a27" }}>✓ {sRight}</span>
-              <span style={{ color:"#8b2020" }}>✗ {sWrong}</span>
+              <span style={{ color:"#2d5a27" }}>&#10003; {sRight}</span>
+              <span style={{ color:"#8b2020" }}>&#10007; {sWrong}</span>
               <span>{total - idx - 1} left</span>
             </div>
           </div>
         )}
 
-        {/* ══ DONE ══ */}
+        {/* ═══════════════════════════════════════════════════════ DONE */}
         {screen === "done" && (
-          <div className="fade-up" style={{ textAlign:"center", paddingSelTop:28 }}>
+          <div className="fade-up" style={{ textAlign:"center", paddingTop:28 }}>
             <div style={{ fontSize:44, marginBottom:8 }}>
               {accuracy >= 80 ? "🎉" : accuracy >= 50 ? "💪" : "📖"}
             </div>
-            <div style={{ fontFamily:"'Noto Serif SC'", fontSize:22, color:"#2d3a1e", marginBottom:2 }}>
-              练习完成
-            </div>
+            <div style={{ fontFamily:"'Noto Serif SC'", fontSize:22,
+                          color:"#2d3a1e", marginBottom:2 }}>练习完成</div>
             <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:14,
                           color:"#8b7355", marginBottom:22 }}>
               Practice Complete · {lessonLabel()}
@@ -1300,12 +1261,11 @@ export default function HanziQuiz() {
                           padding:18, marginBottom:18,
                           display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
               {[
-                { label:"Correct",  val:sRight, color:"#2d5a27" },
-                { label:"Wrong",    val:sWrong, color:"#8b2020" },
+                { label:"Correct",  val:sRight,  color:"#2d5a27" },
+                { label:"Wrong",    val:sWrong,  color:"#8b2020" },
                 { label:"Answered", val:sRight+sWrong, color:"#2d3a1e" },
-                { label:"Accuracy",
-                  val:`${accuracy}%`,
-                  color: accuracy>=80?"#2d5a27":accuracy>=50?"#8b6914":"#8b2020" },
+                { label:"Accuracy", val:`${accuracy}%`,
+                  color:accuracy>=80?"#2d5a27":accuracy>=50?"#8b6914":"#8b2020" },
               ].map(s => (
                 <div key={s.label} style={{ background:"#f5f0e8", borderRadius:12,
                                             padding:"12px 8px", textAlign:"center" }}>
@@ -1317,19 +1277,19 @@ export default function HanziQuiz() {
               ))}
             </div>
 
-            {/* Missed characters this session — shown as Chinese characters */}
             {sWrong > 0 && (
               <div style={{ background:"#fdf5f5", border:"1px solid #e8c8c8",
-                            borderRadius:14, padding:"14px 16px", marginBottom:16, textAlign:"left" }}>
-                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b2020",
-                              letterSpacing:".15em", marginBottom:10 }}>
+                            borderRadius:14, padding:"14px 16px", marginBottom:16,
+                            textAlign:"left" }}>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11,
+                              color:"#8b2020", letterSpacing:".15em", marginBottom:10 }}>
                   CHARACTERS TO REVIEW ({sWrong})
                 </div>
                 <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
-                  {deck.filter(v => wrongThisCard || (stats[v.hanzi]?.wrongCards || []).length > 0)
-                       .filter((v, i, arr) => arr.findIndex(x => x.hanzi === v.hanzi) === i)
-                       .filter(v => (stats[v.hanzi]?.wrong || 0) > 0)
-                       .map((v, i) => (
+                  {deck
+                    .filter((v,i,arr) => arr.findIndex(x => x.hanzi===v.hanzi)===i)
+                    .filter(v => (stats[v.hanzi]?.wrong || 0) > 0)
+                    .map((v,i) => (
                     <div key={i} style={{ background:"#fff", border:"1px solid #e8c8c8",
                                           borderRadius:8, padding:"4px 10px", textAlign:"center" }}>
                       <div style={{ fontSize:20, color:"#8b2020" }}>{v.hanzi}</div>
@@ -1348,29 +1308,29 @@ export default function HanziQuiz() {
             <button className="btn-outline" style={{ width:"100%", marginBottom:8 }}
                     onClick={() => setScreen("stats")}>查看统计 · View Stats</button>
             <button className="btn-outline" style={{ width:"100%" }}
-                    onClick={() => setScreen("home")}>← Home</button>
+                    onClick={() => setScreen("home")}>&#8592; Home</button>
           </div>
         )}
 
-        {/* ══ STATS ══ */}
+        {/* ═══════════════════════════════════════════════════════ STATS */}
         {screen === "stats" && (
           <div className="fade-up">
             <div style={{ display:"flex", justifyContent:"space-between",
                           alignItems:"center", marginBottom:16 }}>
               <div>
-                <div style={{ fontFamily:"'Noto Serif SC'", fontSize:19, fontWeight:600,
-                              color:"#2d3a1e" }}>统计 · Stats</div>
+                <div style={{ fontFamily:"'Noto Serif SC'", fontSize:19,
+                              fontWeight:600, color:"#2d3a1e" }}>统计 · Stats</div>
                 <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:12,
                               color:"#8b7355", marginTop:2 }}>Ranked by difficulty</div>
               </div>
-              <button onClick={() => setScreen("home")}
-                      style={{ background:"none", border:"none", color:"#8b7355",
-                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
-                ← Back
-              </button>
+              <button onClick={() => setScreen("home")} style={{
+                background:"none", border:"none", color:"#8b7355",
+                fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer",
+              }}>← Back</button>
             </div>
 
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8, marginBottom:14 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)",
+                          gap:8, marginBottom:14 }}>
               {[
                 { label:"Total Words",  val:VOCAB.length },
                 { label:"Reviewed",     val:statsList.filter(s => s.seen > 0).length },
@@ -1396,11 +1356,10 @@ export default function HanziQuiz() {
             {statsTab === "list" && (
               <div style={{ background:"#fff", border:"1px solid #ddd5c0",
                             borderRadius:20, overflow:"hidden", marginBottom:12 }}>
-                {statsList.map((v, i) => (
+                {statsList.map((v,i) => (
                   <div key={`${v.hanzi}-${i}`} style={{
-                    display:"flex", alignItems:"center", gap:10,
-                    padding:"10px 14px",
-                    borderBottom: i < statsList.length-1 ? "1px solid #f0ebe0" : "none",
+                    display:"flex", alignItems:"center", gap:10, padding:"10px 14px",
+                    borderBottom: i<statsList.length-1 ? "1px solid #f0ebe0" : "none",
                     background: v.wrong >= 3 ? "#fdf5f5" : "transparent",
                   }}>
                     <div style={{ fontFamily:"'Noto Serif SC'", fontSize:20,
@@ -1420,9 +1379,10 @@ export default function HanziQuiz() {
                       </span>
                       {v.wrong > 0 && (
                         <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:600,
-                                      fontSize:13, color:"#8b2020" }}>✗ {v.wrong}</div>
+                                      fontSize:13, color:"#8b2020" }}>&#10007; {v.wrong}</div>
                       )}
-                      <div style={{ fontSize:9, color:"#c8b898", fontFamily:"'Crimson Pro',serif",
+                      <div style={{ fontSize:9, color:"#c8b898",
+                                    fontFamily:"'Crimson Pro',serif",
                                     fontStyle: v.seen===0 ? "italic" : "normal" }}>
                         {v.seen === 0 ? "new" : `${v.seen} seen`}
                       </div>
@@ -1435,8 +1395,7 @@ export default function HanziQuiz() {
             {statsTab === "chart" && (
               <div style={{ background:"#fff", border:"1px solid #ddd5c0",
                             borderRadius:20, padding:16, marginBottom:12 }}>
-                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                              letterSpacing:".15em", marginBottom:12 }}>
+                <div style={{ ...labelStyle, marginBottom:12 }}>
                   WRONG ANSWERS PER LESSON
                 </div>
                 <ResponsiveContainer width="100%" height={180}>
@@ -1447,14 +1406,14 @@ export default function HanziQuiz() {
                     <YAxis hide />
                     <Tooltip
                       contentStyle={{ background:"#fff8f0", border:"1px solid #ddd5c0",
-                                      borderRadius:8, fontSize:11, fontFamily:"Crimson Pro",
-                                      color:"#2d3a1e" }}
+                                      borderRadius:8, fontSize:11,
+                                      fontFamily:"Crimson Pro", color:"#2d3a1e" }}
                       formatter={(v,n,p) => [`${v} wrong / ${p.payload.words} words`, ""]}
                       labelStyle={{ color:"#5a4a30", fontWeight:600 }}
                       cursor={{ fill:"#2d3a1e08" }}
                     />
                     <Bar dataKey="wrong" radius={[4,4,0,0]}>
-                      {chartData.map((entry, i) => (
+                      {chartData.map((entry,i) => (
                         <Cell key={i}
                           fill={entry.wrong===0?"#e8e0d0":entry.wrong>=5?"#8b2020":"#c8785a"} />
                       ))}
@@ -1463,45 +1422,39 @@ export default function HanziQuiz() {
                 </ResponsiveContainer>
                 <div style={{ display:"flex", gap:12, marginTop:8, fontSize:11,
                               fontFamily:"'Crimson Pro',serif" }}>
-                  <span style={{ color:"#8b2020" }}>■ 5+ wrong</span>
-                  <span style={{ color:"#c8785a" }}>■ 1–4 wrong</span>
-                  <span style={{ color:"#e8e0d0" }}>■ clean</span>
+                  <span style={{ color:"#8b2020" }}>&#9632; 5+ wrong</span>
+                  <span style={{ color:"#c8785a" }}>&#9632; 1-4 wrong</span>
+                  <span style={{ color:"#e8e0d0" }}>&#9632; clean</span>
                 </div>
               </div>
             )}
 
             <button className="btn-outline" style={{ width:"100%", marginBottom:8 }}
                     onClick={() => setScreen("select")}>Start Practice</button>
-            <button onClick={clearStats}
-                    style={{ background:"none", border:"none", color:"#c8a8a8",
-                             fontFamily:"'Crimson Pro',serif", fontSize:12,
-                             cursor:"pointer", width:"100%", padding:"8px" }}>
-              Clear all stats
-            </button>
+            <button onClick={clearStats} style={{
+              background:"none", border:"none", color:"#c8a8a8",
+              fontFamily:"'Crimson Pro',serif", fontSize:12,
+              cursor:"pointer", width:"100%", padding:"8px",
+            }}>Clear all stats</button>
           </div>
         )}
 
-      </div>
-
-        {/* ══ GRAMMAR SELECT ══ */}
+        {/* ═══════════════════════════════════════════════════════ GRAMMAR SELECT */}
         {screen === "gselect" && (
-          <div className="fade-up" style={{ width:"100%", maxWidth:460, position:"relative", zIndex:1 }}>
+          <div className="fade-up">
             <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
-              <button onClick={() => setScreen("home")}
-                      style={{ background:"none", border:"none", color:"#8b7355",
-                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
-                ← Back
-              </button>
-              <div style={{ fontFamily:"'Noto Serif SC'", fontSize:17, fontWeight:600, color:"#2d3a1e" }}>
-                Choose Grammar Lessons
-              </div>
+              <button onClick={() => setScreen("home")} style={{
+                background:"none", border:"none", color:"#8b7355",
+                fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer",
+              }}>← Back</button>
+              <div style={{ fontFamily:"'Noto Serif SC'", fontSize:17,
+                            fontWeight:600, color:"#2d3a1e" }}>语法 · Grammar</div>
             </div>
 
-            <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                          letterSpacing:".18em", marginBottom:10 }}>PRACTICE MODE</div>
+            <div style={{ ...labelStyle, marginBottom:10 }}>PRACTICE MODE</div>
             <div style={{ display:"flex", gap:8, marginBottom:20, flexWrap:"wrap" }}>
               {[["all","All Lessons"],["single","One Lesson"],["range","Lesson Range"]].map(([m,lbl]) => (
-                <button key={m} className={`mode-btn ${gSelMode===m?"sel":""}`}
+                <button key={m} className={`mode-btn ${gSelMode===m?"gsel":""}`}
                         onClick={() => setGSelMode(m)}>{lbl}</button>
               ))}
             </div>
@@ -1511,27 +1464,21 @@ export default function HanziQuiz() {
                             padding:18, marginBottom:16, textAlign:"center" }}>
                 <div style={{ fontSize:28, marginBottom:6 }}>📖</div>
                 <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:18,
-                              color:"#2d3a1e", fontWeight:600 }}>All {GRAMMAR.length} grammar cards</div>
+                              color:"#2d3a1e", fontWeight:600 }}>All {GRAMMAR.length} cards</div>
                 <div style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
                               fontSize:14, color:"#8b7355", marginTop:4 }}>
-                  Lessons 1–30 · randomized
+                  Lessons 1-30 · Randomized
                 </div>
               </div>
             )}
 
             {gSelMode === "single" && (
               <div style={{ marginBottom:16 }}>
-                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                              letterSpacing:".18em", marginBottom:10 }}>SELECT LESSON</div>
+                <div style={{ ...labelStyle, marginBottom:10 }}>SELECT LESSON</div>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6 }}>
-                  {[...new Set(GRAMMAR.map(g=>g.lesson))].sort((a,b)=>a-b).map(l => (
-                    <button key={l} onClick={() => setGSelSingle(l)} style={{
-                      border: gSelSingle===l ? "2px solid #2d5a27" : "1.5px solid #ddd5c0",
-                      background: gSelSingle===l ? "#2d5a27" : "#fff",
-                      color: gSelSingle===l ? "#f5f0e8" : "#5a4a30",
-                      borderRadius:12, padding:"10px 6px", cursor:"pointer",
-                      fontFamily:"'Crimson Pro',serif", fontSize:13, fontWeight:600,
-                    }}>L{l}</button>
+                  {G_LESSONS.map(l => (
+                    <GLessonBtn key={l} lesson={l} active={gSelSingle===l}
+                                onClick={() => setGSelSingle(l)} />
                   ))}
                 </div>
               </div>
@@ -1542,29 +1489,25 @@ export default function HanziQuiz() {
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
                   {[["FROM", gSelFrom, setGSelFrom],["TO", gSelTo, setGSelTo]].map(([lbl,val,setter]) => (
                     <div key={lbl}>
-                      <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                                    letterSpacing:".18em", marginBottom:8 }}>{lbl} LESSON</div>
+                      <div style={{ ...labelStyle, marginBottom:8 }}>{lbl} LESSON</div>
                       <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:5 }}>
-                        {[...new Set(GRAMMAR.map(g=>g.lesson))].sort((a,b)=>a-b).map(l => (
-                          <button key={l} onClick={() => setter(l)} style={{
-                            border: val===l ? "2px solid #2d5a27" : "1.5px solid #ddd5c0",
-                            background: val===l ? "#2d5a27" : "#fff",
-                            color: val===l ? "#f5f0e8" : "#5a4a30",
-                            borderRadius:10, padding:"8px 4px", cursor:"pointer",
-                            fontFamily:"'Crimson Pro',serif", fontSize:12, fontWeight:600,
-                          }}>L{l}</button>
+                        {G_LESSONS.map(l => (
+                          <GLessonBtn key={l} lesson={l} active={val===l}
+                                      onClick={() => setter(l)} />
                         ))}
                       </div>
                     </div>
                   ))}
                 </div>
                 {gSelFrom != null && gSelTo != null && (
-                  <div style={{ marginTop:12, background:"#f0f7ef", border:"1px solid #c8ddc4",
+                  <div style={{ marginTop:12, background:"#fef9ec", border:"1px solid #e8d898",
                                 borderRadius:12, padding:"10px 14px", textAlign:"center",
                                 fontFamily:"'Crimson Pro',serif" }}>
-                    <span style={{ color:"#2d5a27", fontWeight:600 }}>{gSelectedCards.length} cards</span>
+                    <span style={{ color:"#8b6914", fontWeight:600 }}>
+                      {gSelectedCards.length} cards
+                    </span>
                     <span style={{ color:"#8b7355" }}>
-                      {" "}· Lessons {Math.min(gSelFrom,gSelTo)}–{Math.max(gSelFrom,gSelTo)}
+                      {" "}· Lessons {Math.min(gSelFrom,gSelTo)}-{Math.max(gSelFrom,gSelTo)}
                     </span>
                   </div>
                 )}
@@ -1574,22 +1517,24 @@ export default function HanziQuiz() {
             {gSelectedCards.length > 0 && (
               <div style={{ background:"#fff", border:"1px solid #ddd5c0", borderRadius:14,
                             padding:"12px 14px", marginBottom:16 }}>
-                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
-                              letterSpacing:".18em", marginBottom:8 }}>
-                  PREVIEW — {gSelectedCards.length} CARDS
+                <div style={{ ...labelStyle, marginBottom:8 }}>
+                  PREVIEW - {gSelectedCards.length} CARDS
                 </div>
-                <div style={{ display:"flex", flexWrap:"wrap", gap:5, maxHeight:60, overflowY:"auto" }}>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:6,
+                              maxHeight:72, overflowY:"auto" }}>
                   {gSelectedCards.map((g,i) => (
-                    <span key={i} style={{ background:"#f5f0e8", border:"1px solid #e8e0d0",
+                    <span key={i} style={{ background:"#fef9ec", border:"1px solid #e8d898",
                                            borderRadius:6, padding:"2px 8px",
-                                           fontFamily:"'Crimson Pro',serif",
-                                           fontSize:11, color:"#2d3a1e" }}>L{g.lesson}</span>
+                                           fontSize:11, color:"#8b6914",
+                                           fontFamily:"'Crimson Pro',serif" }}>
+                      L{g.lesson}
+                    </span>
                   ))}
                 </div>
               </div>
             )}
 
-            <button className="btn-green" style={{ width:"100%" }}
+            <button className="btn-gold" style={{ width:"100%" }}
                     disabled={gSelectedCards.length === 0}
                     onClick={startGrammar}>
               {gSelectedCards.length > 0
@@ -1599,167 +1544,140 @@ export default function HanziQuiz() {
           </div>
         )}
 
-        {/* ══ GRAMMAR QUIZ ══ */}
+        {/* ═══════════════════════════════════════════════════════ GRAMMAR QUIZ */}
         {screen === "gquiz" && gDeck.length > 0 && (
-          <div style={{ width:"100%", maxWidth:460, position:"relative", zIndex:1 }}>
+          <div>
             <div style={{ display:"flex", justifyContent:"space-between",
                           alignItems:"center", marginBottom:10 }}>
-              <button onClick={() => setScreen("gselect")}
-                      style={{ background:"none", border:"none", color:"#8b7355",
-                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
-                ← Back
-              </button>
+              <button onClick={() => setScreen("gselect")} style={{
+                background:"none", border:"none", color:"#8b7355",
+                fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer",
+              }}>← Back</button>
               <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#8b7355" }}>
                 {gIdx + 1} / {gDeck.length}
               </div>
             </div>
 
-            {/* Progress bar */}
-            <div style={{ background:"#ddd5c0", borderRadius:999, height:4,
+            <div style={{ background:"#e8d898", borderRadius:999, height:4,
                           marginBottom:14, overflow:"hidden" }}>
-              <div style={{ height:"100%", borderRadius:999, background:"#2d5a27",
-                            width:`${(gIdx/gDeck.length)*100}%`, transition:"width 0.5s ease" }} />
+              <div style={{ height:"100%", borderRadius:999, background:"#8b6914",
+                            width:`${(gIdx/gDeck.length)*100}%`,
+                            transition:"width 0.5s ease" }} />
             </div>
 
-            {/* Lesson + topic badge */}
             <div style={{ textAlign:"center", marginBottom:12 }}>
-              <span style={{ background:"#f0f7ef", border:"1px solid #c8ddc4", borderRadius:999,
+              <span style={{ background:"#fef9ec", border:"1px solid #e8d898", borderRadius:999,
                              padding:"3px 12px", fontFamily:"'Crimson Pro',serif",
-                             fontSize:12, color:"#2d5a27" }}>
-                Lesson {gDeck[gIdx].lesson}
+                             fontSize:12, color:"#8b6914" }}>
+                Lesson {gDeck[gIdx].lesson} · {gDeck[gIdx].topic}
               </span>
             </div>
 
             {/* Flip card */}
             <div key={gAnimKey}
                  onClick={() => setGFlipped(f => !f)}
-                 className="pop-in"
-                 style={{ background: gFlipped ? "#f0f7ef" : "#fff",
-                          border: gFlipped ? "2px solid #2d5a27" : "1px solid #ddd5c0",
-                          borderRadius:24, boxShadow:"0 8px 40px #2d3a1e0d",
-                          padding:"28px 24px", textAlign:"center", minHeight:300,
-                          display:"flex", flexDirection:"column", alignItems:"center",
-                          justifyContent:"center", gap:16, marginBottom:12,
-                          cursor:"pointer", transition:"background .25s, border .25s",
-                          userSelect:"none" }}>
-
+                 style={{
+                   background: gFlipped ? "#fef9ec" : "#fff",
+                   border: gFlipped ? "2px solid #8b6914" : "1px solid #ddd5c0",
+                   borderRadius:24, boxShadow:"0 8px 40px #2d3a1e0d",
+                   padding:"32px 24px", textAlign:"center", minHeight:280,
+                   display:"flex", flexDirection:"column", alignItems:"center",
+                   justifyContent:"center", gap:16, marginBottom:14,
+                   cursor:"pointer", transition:"background .25s, border .25s",
+                   userSelect:"none",
+                 }}>
               {!gFlipped ? (
-                /* FRONT — Chinese examples */
                 <>
-                  <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:600,
-                                fontSize:13, color:"#8b7355", letterSpacing:".15em",
-                                marginBottom:4 }}>
-                    {gDeck[gIdx].topic.toUpperCase()}
+                  <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11,
+                                color:"#c8b898", letterSpacing:".2em", marginBottom:4 }}>
+                    FRONT · TAP TO SEE PINYIN
                   </div>
-                  <div style={{ width:32, height:1, background:"#ddd5c0", marginBottom:4 }} />
-                  {/* Pattern */}
-                  <div style={{ background:"#f5f0e8", borderRadius:10, padding:"8px 14px",
-                                fontFamily:"'Crimson Pro',serif", fontSize:14,
-                                color:"#5a4a30", lineHeight:1.6, whiteSpace:"pre-line" }}>
+                  <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:12,
+                                color:"#8b6914", letterSpacing:".1em", marginBottom:8,
+                                background:"#fef9ec", borderRadius:8, padding:"6px 14px" }}>
                     {gDeck[gIdx].pattern}
                   </div>
-                  {/* Chinese sentences */}
-                  <div style={{ fontFamily:"'Noto Serif SC'", fontSize:20,
-                                color:"#1a2410", lineHeight:2, whiteSpace:"pre-line",
-                                textAlign:"left", width:"100%" }}>
+                  <div style={{ fontFamily:"'Noto Serif SC'", fontSize:22,
+                                color:"#1a2410", lineHeight:1.8, whiteSpace:"pre-line" }}>
                     {gDeck[gIdx].front}
-                  </div>
-                  <div style={{ fontSize:11, color:"#c8b898", letterSpacing:".15em",
-                                fontFamily:"'Crimson Pro',serif", marginTop:4 }}>
-                    TAP TO SEE PINYIN →
                   </div>
                 </>
               ) : (
-                /* BACK — Pinyin + tip */
                 <>
-                  <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:600,
-                                fontSize:13, color:"#2d5a27", letterSpacing:".15em",
-                                marginBottom:4 }}>
-                    PINYIN
+                  <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11,
+                                color:"#8b6914", letterSpacing:".2em", marginBottom:4 }}>
+                    PINYIN · TAP TO FLIP BACK
                   </div>
-                  <div style={{ width:32, height:1, background:"#c8ddc4", marginBottom:4 }} />
-                  {/* Pinyin sentences */}
                   <div style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
-                                fontSize:18, color:"#2d5a27", lineHeight:2,
-                                whiteSpace:"pre-line", textAlign:"left", width:"100%" }}>
+                                fontSize:18, color:"#2d5a27", lineHeight:1.9,
+                                whiteSpace:"pre-line" }}>
                     {gDeck[gIdx].back}
                   </div>
-                  {/* Pro tip */}
                   {gDeck[gIdx].tip !== "" && (
-                    <div style={{ background:"#e8f4e8", border:"1px solid #c8ddc4",
-                                  borderRadius:12, padding:"12px 14px", marginTop:8,
+                    <div style={{ background:"#f0f7ef", border:"1px solid #c8ddc4",
+                                  borderRadius:12, padding:"12px 14px", textAlign:"left",
                                   fontFamily:"'Crimson Pro',serif", fontSize:13,
-                                  color:"#2d3a1e", lineHeight:1.7, textAlign:"left",
-                                  width:"100%" }}>
-                      <span style={{ fontWeight:600, color:"#2d5a27" }}>💡 Pro Tip: </span>
+                                  color:"#2d5a27", lineHeight:1.7, marginTop:4 }}>
+                      <span style={{ fontWeight:600 }}>💡 Tip: </span>
                       {gDeck[gIdx].tip}
                     </div>
                   )}
-                  <div style={{ fontSize:11, color:"#2d5a27", letterSpacing:".15em",
-                                fontFamily:"'Crimson Pro',serif", marginTop:4 }}>
-                    ← TAP TO SEE CHINESE
-                  </div>
                 </>
               )}
             </div>
 
-            {/* Navigation */}
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
-              <button className="btn-outline" onClick={gPrev}
-                      disabled={gIdx === 0}
-                      style={{ opacity: gIdx===0 ? .3 : 1, fontSize:14, padding:"12px" }}>
-                ← Prev
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10 }}>
+              <button onClick={gPrev} disabled={gIdx === 0} style={{
+                background:"none", border:"1.5px solid #ddd5c0", borderRadius:12,
+                padding:"14px", fontFamily:"'Crimson Pro',serif", fontSize:15,
+                color: gIdx===0 ? "#ccc" : "#5a4a30",
+                cursor: gIdx===0 ? "not-allowed" : "pointer", transition:"all .2s",
+              }}>← Prev</button>
+              <button onClick={() => setGFlipped(f => !f)} style={{
+                background:"#8b6914", border:"none", borderRadius:12, padding:"14px",
+                fontFamily:"'Crimson Pro',serif", fontSize:14, color:"#fff",
+                cursor:"pointer", transition:"all .2s", fontWeight:600,
+              }}>
+                {gFlipped ? "Front" : "Pinyin"}
               </button>
-              <button onClick={() => { setGFlipped(f => !f); }}
-                      style={{ border:"1px solid #ddd5c0", background:"#fff",
-                               borderRadius:10, padding:"12px", cursor:"pointer",
-                               fontFamily:"'Crimson Pro',serif", fontSize:14, color:"#5a4a30",
-                               transition:"all .2s" }}>
-                {gFlipped ? "See 汉字" : "See Pīnyīn"}
-              </button>
-              <button className="btn-green" onClick={gNext}
-                      style={{ fontSize:14, padding:"12px" }}>
-                {gIdx + 1 === gDeck.length ? "Finish" : "Next →"}
+              <button onClick={gNext} style={{
+                background: gIdx===gDeck.length-1 ? "#2d5a27" : "#f5f0e8",
+                border: gIdx===gDeck.length-1 ? "none" : "1.5px solid #ddd5c0",
+                borderRadius:12, padding:"14px", fontFamily:"'Crimson Pro',serif",
+                fontSize:15, color: gIdx===gDeck.length-1 ? "#fff" : "#5a4a30",
+                cursor:"pointer", transition:"all .2s",
+              }}>
+                {gIdx === gDeck.length-1 ? "Done ✓" : "Next →"}
               </button>
             </div>
 
-            <div style={{ display:"flex", justifyContent:"center", marginTop:12 }}>
-              <button onClick={() => setScreen("gdone")}
-                      style={{ background:"none", border:"none", color:"#c8b898",
-                               fontFamily:"'Crimson Pro',serif", fontSize:13, cursor:"pointer" }}>
-                ⏹ Stop
-              </button>
+            <div style={{ textAlign:"center", marginTop:14, fontFamily:"'Crimson Pro',serif",
+                          fontSize:12, color:"#c8b898" }}>
+              Tap card to flip · No scoring · Just review
             </div>
           </div>
         )}
 
-        {/* ══ GRAMMAR DONE ══ */}
+        {/* ═══════════════════════════════════════════════════════ GRAMMAR DONE */}
         {screen === "gdone" && (
-          <div className="fade-up" style={{ width:"100%", maxWidth:460, position:"relative",
-                                            zIndex:1, textAlign:"center", paddingSelTop:28 }}>
-            <div style={{ fontSize:44, marginBottom:8 }}>📖</div>
-            <div style={{ fontFamily:"'Noto Serif SC'", fontSize:22, color:"#2d3a1e", marginBottom:4 }}>
-              复习完成
-            </div>
-            <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:14,
+          <div className="fade-up" style={{ textAlign:"center", paddingTop:32 }}>
+            <div style={{ fontSize:48, marginBottom:8 }}>🎊</div>
+            <div style={{ fontFamily:"'Noto Serif SC'", fontSize:24,
+                          color:"#2d3a1e", marginBottom:4 }}>复习完成</div>
+            <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:15,
                           color:"#8b7355", marginBottom:28 }}>
-              Grammar Review Complete · {gDeck.length} cards reviewed
+              Grammar Review Complete · {gDeck.length} cards
             </div>
-
-            <div style={{ background:"#f0f7ef", border:"1px solid #c8ddc4", borderRadius:20,
-                          padding:20, marginBottom:24, fontFamily:"'Crimson Pro',serif" }}>
-              <div style={{ fontSize:13, color:"#2d5a27", marginBottom:4 }}>
-                Keep reviewing regularly to internalize the patterns.
+            <div style={{ background:"#fff", border:"1px solid #ddd5c0",
+                          borderRadius:20, padding:20, marginBottom:20 }}>
+              <div style={{ fontFamily:"'Noto Serif SC'", fontSize:40,
+                            fontWeight:700, color:"#8b6914", marginBottom:4 }}>
+                {gDeck.length}
               </div>
-              <div style={{ fontSize:12, color:"#8b7355", fontStyle:"italic" }}>
-                每天复习一点，长期记住。
-              </div>
-              <div style={{ fontSize:11, color:"#8b7355", fontStyle:"italic" }}>
-                Review a little every day, remember for a long time.
-              </div>
+              <div style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                            fontSize:14, color:"#8b7355" }}>cards reviewed</div>
             </div>
-
-            <button className="btn-green" style={{ width:"100%", marginBottom:10 }}
+            <button className="btn-gold" style={{ width:"100%", marginBottom:10 }}
                     onClick={startGrammar}>再来一次 · Review Again</button>
             <button className="btn-outline" style={{ width:"100%", marginBottom:8 }}
                     onClick={() => setScreen("gselect")}>Change Lessons</button>
@@ -1768,6 +1686,7 @@ export default function HanziQuiz() {
           </div>
         )}
 
+      </div>
     </div>
   );
 }
