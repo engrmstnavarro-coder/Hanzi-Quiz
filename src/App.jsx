@@ -322,6 +322,250 @@ const VOCAB = [
   { lesson: 25, hanzi: "同事", pinyin: "tóng shì", english: "colleague; coworker" },
 ];
 
+// ── GRAMMAR CARDS — Lessons 1–30 ─────────────────────────────────────────
+const GRAMMAR = [
+  {
+    lesson: 1,
+    topic: "Basic Sentence Structure & Questions",
+    pattern: "Subject + Verb + Object\nSubject + 叫 + 什么名字？",
+    front: "1. 我叫王方。\n2. 你叫什么名字？\n3. 我姓林，叫林木。",
+    back: "1. Wǒ jiào Wáng Fāng.\n2. Nǐ jiào shénme míngzi?\n3. Wǒ xìng Lín, jiào Lín Mù.",
+    tip: "",
+  },
+  {
+    lesson: 2,
+    topic: "Basic Sentence Structure & Questions (Review)",
+    pattern: "Subject + Verb + Object\nSubject + 叫 + 什么名字？",
+    front: "4. 他叫什么？\n5. 我是马克。\n6. 你是谁？",
+    back: "4. Tā jiào shénme?\n5. Wǒ shì Mǎ Kè.\n6. Nǐ shì shéi?",
+    tip: "Question words like 什么 and 谁 do not move to the front of the sentence. You just replace the answer with the question word in the exact same spot!",
+  },
+  {
+    lesson: 3,
+    topic: "The Adverb 'Also / Too' (也)",
+    pattern: "Subject + 也 + Verb/Adj",
+    front: "1. 他也是中国人。\n2. 认识您我也很高兴。\n3. 王方也是中国人。",
+    back: "1. Tā yě shì Zhōngguórén.\n2. Rènshi nín wǒ yě hěn gāoxìng.\n3. Wáng Fāng yě shì Zhōngguórén.",
+    tip: "",
+  },
+  {
+    lesson: 4,
+    topic: "The Adverb 'Also / Too' (也) — Review",
+    pattern: "Subject + 也 + Verb/Adj",
+    front: "4. 我也是学生。\n5. 她也是老师。\n6. 你也是中国人吗？",
+    back: "4. Wǒ yě shì xuésheng.\n5. Tā yě shì lǎoshī.\n6. Nǐ yě shì Zhōngguórén ma?",
+    tip: "也 (yě) CANNOT be put at the very end of a sentence like the English word 'too'. It must be placed strictly before the verb.",
+  },
+  {
+    lesson: 5,
+    topic: "Yes/No Questions (吗), Negation (不)",
+    pattern: "Statement + 吗？\nSubject + 不 + Verb",
+    front: "1. 您是木先生吗？\n2. 这不是我的快递。\n3. 这是您的快递。",
+    back: "1. Nín shì Mù xiānsheng ma?\n2. Zhè bú shì wǒ de kuàidí.\n3. Zhè shì nín de kuàidí.",
+    tip: "",
+  },
+  {
+    lesson: 6,
+    topic: "Yes/No Questions (吗), Negation (不) — Review",
+    pattern: "Statement + 吗？\nSubject + 不 + Verb",
+    front: "4. 他不是我的老师。\n5. 你是北京人吗？\n6. 这不是你的书。",
+    back: "4. Tā bú shì wǒ de lǎoshī.\n5. Nǐ shì Běijīngrén ma?\n6. Zhè bú shì nǐ de shū.",
+    tip: "Never use 吗 with question words (like 什么 or 谁). Also, 不 (bù) changes to rising 2nd tone (bú) when placed before a 4th tone word like 是 (shì).",
+  },
+  {
+    lesson: 7,
+    topic: "Adjective Predicates & A-not-A Questions",
+    pattern: "Subject + 很 + Adjective\nSubject + Adj + 不 + Adj？",
+    front: "1. 他很忙。\n2. 她忙不忙？\n3. 他非常忙。",
+    back: "1. Tā hěn máng.\n2. Tā máng bu máng?\n3. Tā fēicháng máng.",
+    tip: "",
+  },
+  {
+    lesson: 8,
+    topic: "Adjective Predicates & A-not-A Questions — Review",
+    pattern: "Subject + 很 + Adjective\nSubject + Adj + 不 + Adj？",
+    front: "4. 他很高。\n5. 我很好。\n6. 你累不累？",
+    back: "4. Tā hěn gāo.\n5. Wǒ hěn hǎo.\n6. Nǐ lèi bu lèi?",
+    tip: "Do not use 是 (to be) with adjectives! Saying 我是很好 is unnatural. Just say 我很好.",
+  },
+  {
+    lesson: 9,
+    topic: "The Adverb 'All' (都) & Elliptical '呢'",
+    pattern: "Subject (Plural) + 都 + Verb\nNoun/Pronoun + 呢？",
+    front: "1. 他们都喜欢吃中国菜。\n2. 你呢？\n3. 他们都喜欢上网。",
+    back: "1. Tāmen dōu xǐhuan chī Zhōngguó cài.\n2. Nǐ ne?\n3. Tāmen dōu xǐhuan shàngwǎng.",
+    tip: "",
+  },
+  {
+    lesson: 10,
+    topic: "The Adverb 'All' (都) & Elliptical '呢' — Review",
+    pattern: "Subject (Plural) + 都 + Verb\nNoun/Pronoun + 呢？",
+    front: "4. 我们都是学生。\n5. 他们都很忙。\n6. 我喜欢喝茶，你呢？",
+    back: "4. Wǒmen dōu shì xuésheng.\n5. Tāmen dōu hěn máng.\n6. Wǒ xǐhuan hē chá, nǐ ne?",
+    tip: "If a sentence uses both 也 (also) and 都 (all), the strict order is always 也都. Example: 我们也都喜欢 (We also all like it).",
+  },
+  {
+    lesson: 11,
+    topic: "To Have (有/没有) & Measure Words (个)",
+    pattern: "Subject + 有 / 没有 + Object\nNumeral + Measure Word + Noun",
+    front: "1. 我有一个姐姐。\n2. 我没有哥哥。\n3. 他家有几口人？",
+    back: "1. Wǒ yǒu yí ge jiějie.\n2. Wǒ méiyǒu gēge.\n3. Tā jiā yǒu jǐ kǒu rén?",
+    tip: "",
+  },
+  {
+    lesson: 12,
+    topic: "To Have (有/没有) & Measure Words (个) — Review",
+    pattern: "Subject + 有 / 没有 + Object\nNumeral + Measure Word + Noun",
+    front: "4. 我有三个妹妹。\n5. 他没有妹妹。\n6. 我有两个朋友。",
+    back: "4. Wǒ yǒu sān ge mèimei.\n5. Tā méiyǒu mèimei.\n6. Wǒ yǒu liǎng ge péngyou.",
+    tip: "不有 does not exist in Chinese. The negation of 有 is ALWAYS 没有. When stating you have two of something, use 两 (liǎng), never 二 (èr).",
+  },
+  {
+    lesson: 13,
+    topic: "Indicating Location (在)",
+    pattern: "Subject + 在/不在 + Location (+ 上/下)",
+    front: "1. 我的钥匙在哪儿？\n2. 钥匙在桌子上。\n3. 钥匙不在沙发上。",
+    back: "1. Wǒ de yàoshi zài nǎr?\n2. Yàoshi zài zhuōzi shang.\n3. Yàoshi bú zài shāfā shang.",
+    tip: "",
+  },
+  {
+    lesson: 14,
+    topic: "Indicating Location (在) — Review",
+    pattern: "Subject + 在/不在 + Location (+ 上/下)",
+    front: "4. 我在学校。\n5. 书在杯子旁边。\n6. 他不在家。",
+    back: "4. Wǒ zài xuéxiào.\n5. Shū zài bēizi pángbiān.\n6. Tā bú zài jiā.",
+    tip: "Proper places (like 学校, 医院, 家) do not need a position word. But common objects (like 桌子) MUST have a direction word (上, 下, 里) to become a location.",
+  },
+  {
+    lesson: 15,
+    topic: "Attributes (的) & Asking Opinions (怎么样)",
+    pattern: "Adjective + 的 + Noun\nSubject + 怎么样？",
+    front: "1. 这条红色的裙子好看吗？\n2. 这件黄色的衣服怎么样？\n3. 你穿什么都好看。",
+    back: "1. Zhè tiáo hóngsè de qúnzi hǎokàn ma?\n2. Zhè jiàn huángsè de yīfu zěnmeyàng?\n3. Nǐ chuān shénme dōu hǎokàn.",
+    tip: "",
+  },
+  {
+    lesson: 16,
+    topic: "Attributes (的) & Asking Opinions (怎么样) — Review",
+    pattern: "Adjective + 的 + Noun\nSubject + 怎么样？",
+    front: "4. 这是我的书。\n5. 这件衣服很好。\n6. 这个怎么样？",
+    back: "4. Zhè shì wǒ de shū.\n5. Zhè jiàn yīfu hěn hǎo.\n6. Zhè ge zěnmeyàng?",
+    tip: "If an adjective has two syllables (e.g. 漂亮), you generally MUST use 的 before the noun. One-syllable adjectives (e.g. 好, 新) often drop the 的.",
+  },
+  {
+    lesson: 17,
+    topic: "Date Expressions",
+    pattern: "Year + Month + Day (号/日)",
+    front: "1. 春节是农历一月一日。\n2. 今天星期天。\n3. 中秋节是几月几日？",
+    back: "1. Chūnjié shì nónglì yī yuè yī rì.\n2. Jīntiān xīngqītiān.\n3. Zhōngqiūjié shì jǐ yuè jǐ rì?",
+    tip: "",
+  },
+  {
+    lesson: 18,
+    topic: "Date Expressions — Review",
+    pattern: "Year + Month + Day (号/日)",
+    front: "4. 今天是三月八号。\n5. 明天是星期五。\n6. 昨天是几号？",
+    back: "4. Jīntiān shì sān yuè bā hào.\n5. Míngtiān shì xīngqī wǔ.\n6. Zuótiān shì jǐ hào?",
+    tip: "In casual speech, always use 号 (hào) for the day of the month. 日 (rì) is formal and mostly used in writing or official announcements.",
+  },
+  {
+    lesson: 19,
+    topic: "Alternative Questions (还是) & Nouns as Measure Words",
+    pattern: "A + 还是 + B？\nNumeral + Container + Noun",
+    front: "1. 现金还是刷卡？\n2. 您要大碗的还是小碗的？\n3. 再要一杯豆浆。",
+    back: "1. Xiànjīn háishi shuākǎ?\n2. Nín yào dà wǎn de háishi xiǎo wǎn de?\n3. Zài yào yì bēi dòujiāng.",
+    tip: "",
+  },
+  {
+    lesson: 20,
+    topic: "Alternative Questions (还是) & Nouns as Measure Words — Review",
+    pattern: "A + 还是 + B？\nNumeral + Container + Noun",
+    front: "4. 你喝咖啡还是茶？\n5. 你要红色的还是黄色的？\n6. 他是北京人还是上海人？",
+    back: "4. Nǐ hē kāfēi háishi chá?\n5. Nǐ yào hóngsè de háishi huángsè de?\n6. Tā shì Běijīngrén háishi Shànghǎirén?",
+    tip: "还是 is strictly for questions. For 'or' in a statement, use 或者 (huòzhě) instead.",
+  },
+  {
+    lesson: 21,
+    topic: "Asking Prices & Units of Weight",
+    pattern: "Item + 多少钱 + 一 + Measure Word",
+    front: "1. 苹果多少钱一斤？\n2. 草莓十五块钱一盒。\n3. 我要两斤苹果。",
+    back: "1. Píngguǒ duōshao qián yì jīn?\n2. Cǎoméi shíwǔ kuài qián yì hé.\n3. Wǒ yào liǎng jīn píngguǒ.",
+    tip: "",
+  },
+  {
+    lesson: 22,
+    topic: "Asking Prices & Units of Weight — Review",
+    pattern: "Item + 多少钱 + 一 + Measure Word",
+    front: "4. 这个多少钱？\n5. 我要五斤苹果。\n6. 他要两杯茶。",
+    back: "4. Zhè ge duōshao qián?\n5. Wǒ yào wǔ jīn píngguǒ.\n6. Tā yào liǎng bēi chá.",
+    tip: "In everyday speech, 块 (kuài) is used instead of formal 元 (yuán), and 毛 (máo) instead of 角 (jiǎo) for 10-cent increments.",
+  },
+  {
+    lesson: 23,
+    topic: "Directions (往) & Emphasis (就)",
+    pattern: "Place + 怎么走？\n往 + Direction + Verb",
+    front: "1. 请问，银行怎么走？\n2. 一直往前走。\n3. 那个白色的大楼就是。",
+    back: "1. Qǐngwèn, yínháng zěnme zǒu?\n2. Yìzhí wǎng qián zǒu.\n3. Nàge báisè de dàlóu jiù shì.",
+    tip: "",
+  },
+  {
+    lesson: 24,
+    topic: "Directions (往) & Emphasis (就) — Review",
+    pattern: "Place + 怎么走？\n往 + Direction + Verb",
+    front: "4. 往左走。\n5. 往右拐。\n6. 银行就在那儿。",
+    back: "4. Wǎng zuǒ zǒu.\n5. Wǎng yòu guǎi.\n6. Yínháng jiù zài nàr.",
+    tip: "怎么走 (zěnme zǒu) asks for the physical route. 怎么去 (zěnme qù) asks for the method of transportation.",
+  },
+  {
+    lesson: 25,
+    topic: "Method of Action (Verb Sequences)",
+    pattern: "Subject + Method (Verb 1) + Action (Verb 2)",
+    front: "1. 你怎么上班？\n2. 我坐公共汽车上班。\n3. 姐姐打车去机场。",
+    back: "1. Nǐ zěnme shàngbān?\n2. Wǒ zuò gōnggòng qìchē shàngbān.\n3. Jiějie dǎchē qù jīchǎng.",
+    tip: "",
+  },
+  {
+    lesson: 26,
+    topic: "Method of Action (Verb Sequences) — Review",
+    pattern: "Subject + Method (Verb 1) + Action (Verb 2)",
+    front: "4. 我走路去。\n5. 他坐火车来。\n6. 你怎么去？",
+    back: "4. Wǒ zǒulù qù.\n5. Tā zuò huǒchē lái.\n6. Nǐ zěnme qù?",
+    tip: "The method or tool MUST come before the action. Chinese logic: you have to get on the bus before you can go to work — 坐公共汽车上班.",
+  },
+  {
+    lesson: 27,
+    topic: "Completed Action (了) & Purpose",
+    pattern: "Sentence + 了\nSubject + 去 + Place + Action",
+    front: "1. 你们做什么了？\n2. 我去埃及旅游了。\n3. 这么快就回来了？",
+    back: "1. Nǐmen zuò shénme le?\n2. Wǒ qù Āijí lǚyóu le.\n3. Zhème kuài jiù huílái le?",
+    tip: "",
+  },
+  {
+    lesson: 28,
+    topic: "Completed Action (了) & Purpose — Review",
+    pattern: "Sentence + 了\nSubject + 去 + Place + Action",
+    front: "4. 我吃饭了。\n5. 他看电影了。\n6. 我买书了。",
+    back: "4. Wǒ chī fàn le.\n5. Tā kàn diànyǐng le.\n6. Wǒ mǎi shū le.",
+    tip: "了 (le) does NOT equal past tense! It means completed action. It can even apply to future events once they are completed.",
+  },
+  {
+    lesson: 29,
+    topic: "Suggestions (吧) & Setting Appointments (见)",
+    pattern: "Sentence + 吧\nTime/Place + 见",
+    front: "1. 我们明天去长城吧。\n2. 早上六点半出发，怎么样？\n3. 晚上七点十五分电影院见。",
+    back: "1. Wǒmen míngtiān qù Chángchéng ba.\n2. Zǎoshang liù diǎn bàn chūfā, zěnmeyàng?\n3. Wǎnshang qī diǎn shíwǔ fēn diànyǐngyuàn jiàn.",
+    tip: "",
+  },
+  {
+    lesson: 30,
+    topic: "Suggestions (吧) & Setting Appointments (见) — Review",
+    pattern: "Sentence + 吧\nTime/Place + 见",
+    front: "4. 我们走吧。\n5. 我们吃饭吧。\n6. 他们去看电影吧。",
+    back: "4. Wǒmen zǒu ba.\n5. Wǒmen chī fàn ba.\n6. Tāmen qù kàn diànyǐng ba.",
+    tip: "Adding 吧 (ba) softens a command into a polite suggestion. 走! is harsh (Leave!), but 走吧 means a friendly Let's go.",
+  },
+];
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 const LS_KEY = "hanzi-quiz-v3";
@@ -364,6 +608,18 @@ export default function HanziQuiz() {
   const [selTo, setSelTo]         = useState(null);
   const [statsTab, setStatsTab]   = useState("list");
   const [showStopConfirm, setShowStopConfirm] = useState(false);
+
+  // ── Grammar mode state ──
+  const [mode, setMode]               = useState("home");   // home | vocab | grammar
+  const [gDeck, setGDeck]             = useState([]);
+  const [gIdx, setGIdx]               = useState(0);
+  const [gFlipped, setGFlipped]       = useState(false);
+  const [gSelMode, setGSelMode]       = useState("all");
+  const [gSelSingle, setGSelSingle]   = useState(null);
+  const [gSelFrom, setGSelFrom]       = useState(null);
+  const [gSelTo, setGSelTo]           = useState(null);
+  const [gAnimKey, setGAnimKey]       = useState(0);
+
 
   useEffect(() => {
     const s = load();
@@ -495,6 +751,46 @@ export default function HanziQuiz() {
     setStats({});
   }
 
+  // ── Grammar helpers ──────────────────────────────────────────────────────
+  const G_LESSONS = [...new Set(GRAMMAR.map(g => g.lesson))].sort((a,b) => a-b);
+
+  function getGSelectedLessons() {
+    if (gSelMode === "all")    return G_LESSONS;
+    if (gSelMode === "single") return gSelSingle != null ? [gSelSingle] : [];
+    if (gSelMode === "range") {
+      if (gSelFrom == null || gSelTo == null) return [];
+      const f = Math.min(gSelFrom, gSelTo), t = Math.max(gSelFrom, gSelTo);
+      return G_LESSONS.filter(l => l >= f && l <= t);
+    }
+    return [];
+  }
+
+  const gSelectedLessons = getGSelectedLessons();
+  const gSelectedCards   = GRAMMAR.filter(g => gSelectedLessons.includes(g.lesson));
+
+  function startGrammar() {
+    if (gSelectedCards.length === 0) return;
+    setGDeck(shuffle(gSelectedCards));
+    setGIdx(0);
+    setGFlipped(false);
+    setGAnimKey(k => k + 1);
+    setScreen("gquiz");
+  }
+
+  function gNext() {
+    if (gIdx + 1 >= gDeck.length) { setScreen("gdone"); return; }
+    setGIdx(i => i + 1);
+    setGFlipped(false);
+    setGAnimKey(k => k + 1);
+  }
+
+  function gPrev() {
+    if (gIdx === 0) return;
+    setGIdx(i => i - 1);
+    setGFlipped(false);
+    setGAnimKey(k => k + 1);
+  }
+
   const statsList = VOCAB.map(v => ({
     ...v,
     wrong: stats[v.hanzi]?.wrong || 0,
@@ -506,6 +802,29 @@ export default function HanziQuiz() {
     wrong: VOCAB.filter(v => v.lesson === l).reduce((a, v) => a + (stats[v.hanzi]?.wrong || 0), 0),
     words: VOCAB.filter(v => v.lesson === l).length,
   }));
+
+  function startGrammar() {
+    if (gSelectedCards.length === 0) return;
+    setGDeck(shuffle(gSelectedCards));
+    setGIdx(0);
+    setGFlipped(false);
+    setGAnimKey(k => k + 1);
+    setScreen("gquiz");
+  }
+
+  function gNext() {
+    if (gIdx + 1 >= gDeck.length) { setScreen("gdone"); return; }
+    setGIdx(i => i + 1);
+    setGFlipped(false);
+    setGAnimKey(k => k + 1);
+  }
+
+  function gPrev() {
+    if (gIdx === 0) return;
+    setGIdx(i => i - 1);
+    setGFlipped(false);
+    setGAnimKey(k => k + 1);
+  }
 
   const accuracy = (sRight + sWrong) > 0
     ? Math.round((sRight / (sRight + sWrong)) * 100) : 0;
@@ -588,11 +907,64 @@ export default function HanziQuiz() {
 
         {/* ══ HOME ══ */}
         {screen === "home" && (
-          <div className="fade-up" style={{ textAlign:"center", paddingTop:24 }}>
+          <div className="fade-up" style={{ textAlign:"center", paddingSelTop:28 }}>
             <div style={{ fontSize:52, marginBottom:4 }}>汉字</div>
             <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#8b7355",
-                          letterSpacing:".25em", marginBottom:4 }}>HÀNZÌ FLASHCARDS</div>
-            <div style={{ width:36, height:2, background:"#8b7355", margin:"12px auto 22px" }} />
+                          letterSpacing:".25em", marginBottom:4 }}>HÀNZÌ STUDY APP</div>
+            <div style={{ width:36, height:2, background:"#8b7355", margin:"12px auto 28px" }} />
+
+            {/* Mode chooser */}
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:20 }}>
+              <button onClick={() => setScreen("vocab")}
+                      style={{ background:"#fff", border:"2px solid #2d5a27", borderRadius:20,
+                               padding:"24px 12px", cursor:"pointer", transition:"all .2s" }}
+                      onMouseOver={e=>e.currentTarget.style.background="#f0f7ef"}
+                      onMouseOut={e=>e.currentTarget.style.background="#fff"}>
+                <div style={{ fontSize:36, marginBottom:8 }}>📚</div>
+                <div style={{ fontFamily:"'Noto Serif SC'", fontSize:15, fontWeight:600,
+                              color:"#2d3a1e", marginBottom:4 }}>词汇</div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#2d5a27" }}>
+                  Vocabulary
+                </div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                              marginTop:4 }}>{VOCAB.length} words · L1–25</div>
+              </button>
+              <button onClick={() => setScreen("gselect")}
+                      style={{ background:"#fff", border:"2px solid #8b6914", borderRadius:20,
+                               padding:"24px 12px", cursor:"pointer", transition:"all .2s" }}
+                      onMouseOver={e=>e.currentTarget.style.background="#fef9ec"}
+                      onMouseOut={e=>e.currentTarget.style.background="#fff"}>
+                <div style={{ fontSize:36, marginBottom:8 }}>📖</div>
+                <div style={{ fontFamily:"'Noto Serif SC'", fontSize:15, fontWeight:600,
+                              color:"#2d3a1e", marginBottom:4 }}>语法</div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#8b6914" }}>
+                  Grammar
+                </div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                              marginTop:4 }}>{GRAMMAR.length} cards · L1–30</div>
+              </button>
+            </div>
+
+            <button className="btn-outline" style={{ width:"100%" }}
+                    onClick={() => setScreen("stats")}>
+              查看统计 · View Vocab Stats
+            </button>
+          </div>
+        )}
+
+        {/* ══ VOCAB HOME ══ */}
+        {screen === "vocab" && (
+          <div className="fade-up" style={{ textAlign:"center", paddingSelTop:20 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20,
+                          textAlign:"left" }}>
+              <button onClick={() => setScreen("home")}
+                      style={{ background:"none", border:"none", color:"#8b7355",
+                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
+                ← Back
+              </button>
+              <div style={{ fontFamily:"'Noto Serif SC'", fontSize:18, fontWeight:600,
+                            color:"#2d3a1e" }}>词汇 · Vocabulary</div>
+            </div>
 
             <div style={{ background:"#fff", border:"1px solid #ddd5c0", borderRadius:20,
                           padding:"18px", marginBottom:16, boxShadow:"0 4px 24px #2d3a1e0a" }}>
@@ -608,7 +980,7 @@ export default function HanziQuiz() {
                   const seen   = VOCAB.filter(v => v.lesson === l)
                     .filter(v => (stats[v.hanzi]?.seen || 0) > 0).length;
                   return (
-                    <div key={l} style={{ background: seen === count ? "#f0f7ef" : "#f5f0e8",
+                    <div key={l} style={{ background: seen===count ? "#f0f7ef" : "#f5f0e8",
                                           border:`1px solid ${seen===count?"#c8ddc4":"#e8e0d0"}`,
                                           borderRadius:10, padding:"8px 4px", textAlign:"center" }}>
                       <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:700,
@@ -625,7 +997,8 @@ export default function HanziQuiz() {
               </div>
             </div>
 
-            <button className="btn-green" style={{ width:"100%", fontSize:18, padding:"16px", marginBottom:10 }}
+            <button className="btn-green" style={{ width:"100%", fontSize:18, padding:"16px",
+                                                    marginBottom:10 }}
                     onClick={() => setScreen("select")}>
               开始练习 · Start Practice
             </button>
@@ -641,7 +1014,6 @@ export default function HanziQuiz() {
           </div>
         )}
 
-        {/* ══ LESSON SELECT ══ */}
         {screen === "select" && (
           <div className="fade-up">
             <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
@@ -912,7 +1284,7 @@ export default function HanziQuiz() {
 
         {/* ══ DONE ══ */}
         {screen === "done" && (
-          <div className="fade-up" style={{ textAlign:"center", paddingTop:28 }}>
+          <div className="fade-up" style={{ textAlign:"center", paddingSelTop:28 }}>
             <div style={{ fontSize:44, marginBottom:8 }}>
               {accuracy >= 80 ? "🎉" : accuracy >= 50 ? "💪" : "📖"}
             </div>
@@ -1110,6 +1482,292 @@ export default function HanziQuiz() {
         )}
 
       </div>
+
+        {/* ══ GRAMMAR SELECT ══ */}
+        {screen === "gselect" && (
+          <div className="fade-up" style={{ width:"100%", maxWidth:460, position:"relative", zIndex:1 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20 }}>
+              <button onClick={() => setScreen("home")}
+                      style={{ background:"none", border:"none", color:"#8b7355",
+                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
+                ← Back
+              </button>
+              <div style={{ fontFamily:"'Noto Serif SC'", fontSize:17, fontWeight:600, color:"#2d3a1e" }}>
+                Choose Grammar Lessons
+              </div>
+            </div>
+
+            <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                          letterSpacing:".18em", marginBottom:10 }}>PRACTICE MODE</div>
+            <div style={{ display:"flex", gap:8, marginBottom:20, flexWrap:"wrap" }}>
+              {[["all","All Lessons"],["single","One Lesson"],["range","Lesson Range"]].map(([m,lbl]) => (
+                <button key={m} className={`mode-btn ${gSelMode===m?"sel":""}`}
+                        onClick={() => setGSelMode(m)}>{lbl}</button>
+              ))}
+            </div>
+
+            {gSelMode === "all" && (
+              <div style={{ background:"#fff", border:"1px solid #ddd5c0", borderRadius:16,
+                            padding:18, marginBottom:16, textAlign:"center" }}>
+                <div style={{ fontSize:28, marginBottom:6 }}>📖</div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:18,
+                              color:"#2d3a1e", fontWeight:600 }}>All {GRAMMAR.length} grammar cards</div>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                              fontSize:14, color:"#8b7355", marginTop:4 }}>
+                  Lessons 1–30 · randomized
+                </div>
+              </div>
+            )}
+
+            {gSelMode === "single" && (
+              <div style={{ marginBottom:16 }}>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                              letterSpacing:".18em", marginBottom:10 }}>SELECT LESSON</div>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6 }}>
+                  {[...new Set(GRAMMAR.map(g=>g.lesson))].sort((a,b)=>a-b).map(l => (
+                    <button key={l} onClick={() => setGSelSingle(l)} style={{
+                      border: gSelSingle===l ? "2px solid #2d5a27" : "1.5px solid #ddd5c0",
+                      background: gSelSingle===l ? "#2d5a27" : "#fff",
+                      color: gSelSingle===l ? "#f5f0e8" : "#5a4a30",
+                      borderRadius:12, padding:"10px 6px", cursor:"pointer",
+                      fontFamily:"'Crimson Pro',serif", fontSize:13, fontWeight:600,
+                    }}>L{l}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {gSelMode === "range" && (
+              <div style={{ marginBottom:16 }}>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+                  {[["FROM", gSelFrom, setGSelFrom],["TO", gSelTo, setGSelTo]].map(([lbl,val,setter]) => (
+                    <div key={lbl}>
+                      <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                                    letterSpacing:".18em", marginBottom:8 }}>{lbl} LESSON</div>
+                      <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:5 }}>
+                        {[...new Set(GRAMMAR.map(g=>g.lesson))].sort((a,b)=>a-b).map(l => (
+                          <button key={l} onClick={() => setter(l)} style={{
+                            border: val===l ? "2px solid #2d5a27" : "1.5px solid #ddd5c0",
+                            background: val===l ? "#2d5a27" : "#fff",
+                            color: val===l ? "#f5f0e8" : "#5a4a30",
+                            borderRadius:10, padding:"8px 4px", cursor:"pointer",
+                            fontFamily:"'Crimson Pro',serif", fontSize:12, fontWeight:600,
+                          }}>L{l}</button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {gSelFrom != null && gSelTo != null && (
+                  <div style={{ marginTop:12, background:"#f0f7ef", border:"1px solid #c8ddc4",
+                                borderRadius:12, padding:"10px 14px", textAlign:"center",
+                                fontFamily:"'Crimson Pro',serif" }}>
+                    <span style={{ color:"#2d5a27", fontWeight:600 }}>{gSelectedCards.length} cards</span>
+                    <span style={{ color:"#8b7355" }}>
+                      {" "}· Lessons {Math.min(gSelFrom,gSelTo)}–{Math.max(gSelFrom,gSelTo)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {gSelectedCards.length > 0 && (
+              <div style={{ background:"#fff", border:"1px solid #ddd5c0", borderRadius:14,
+                            padding:"12px 14px", marginBottom:16 }}>
+                <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11, color:"#8b7355",
+                              letterSpacing:".18em", marginBottom:8 }}>
+                  PREVIEW — {gSelectedCards.length} CARDS
+                </div>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:5, maxHeight:60, overflowY:"auto" }}>
+                  {gSelectedCards.map((g,i) => (
+                    <span key={i} style={{ background:"#f5f0e8", border:"1px solid #e8e0d0",
+                                           borderRadius:6, padding:"2px 8px",
+                                           fontFamily:"'Crimson Pro',serif",
+                                           fontSize:11, color:"#2d3a1e" }}>L{g.lesson}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button className="btn-green" style={{ width:"100%" }}
+                    disabled={gSelectedCards.length === 0}
+                    onClick={startGrammar}>
+              {gSelectedCards.length > 0
+                ? `开始 · Start ${gSelectedCards.length} Cards`
+                : "Select a lesson to continue"}
+            </button>
+          </div>
+        )}
+
+        {/* ══ GRAMMAR QUIZ ══ */}
+        {screen === "gquiz" && gDeck.length > 0 && (
+          <div style={{ width:"100%", maxWidth:460, position:"relative", zIndex:1 }}>
+            <div style={{ display:"flex", justifyContent:"space-between",
+                          alignItems:"center", marginBottom:10 }}>
+              <button onClick={() => setScreen("gselect")}
+                      style={{ background:"none", border:"none", color:"#8b7355",
+                               fontFamily:"'Crimson Pro',serif", fontSize:15, cursor:"pointer" }}>
+                ← Back
+              </button>
+              <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:13, color:"#8b7355" }}>
+                {gIdx + 1} / {gDeck.length}
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div style={{ background:"#ddd5c0", borderRadius:999, height:4,
+                          marginBottom:14, overflow:"hidden" }}>
+              <div style={{ height:"100%", borderRadius:999, background:"#2d5a27",
+                            width:`${(gIdx/gDeck.length)*100}%`, transition:"width 0.5s ease" }} />
+            </div>
+
+            {/* Lesson + topic badge */}
+            <div style={{ textAlign:"center", marginBottom:12 }}>
+              <span style={{ background:"#f0f7ef", border:"1px solid #c8ddc4", borderRadius:999,
+                             padding:"3px 12px", fontFamily:"'Crimson Pro',serif",
+                             fontSize:12, color:"#2d5a27" }}>
+                Lesson {gDeck[gIdx].lesson}
+              </span>
+            </div>
+
+            {/* Flip card */}
+            <div key={gAnimKey}
+                 onClick={() => setGFlipped(f => !f)}
+                 className="pop-in"
+                 style={{ background: gFlipped ? "#f0f7ef" : "#fff",
+                          border: gFlipped ? "2px solid #2d5a27" : "1px solid #ddd5c0",
+                          borderRadius:24, boxShadow:"0 8px 40px #2d3a1e0d",
+                          padding:"28px 24px", textAlign:"center", minHeight:300,
+                          display:"flex", flexDirection:"column", alignItems:"center",
+                          justifyContent:"center", gap:16, marginBottom:12,
+                          cursor:"pointer", transition:"background .25s, border .25s",
+                          userSelect:"none" }}>
+
+              {!gFlipped ? (
+                /* FRONT — Chinese examples */
+                <>
+                  <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:600,
+                                fontSize:13, color:"#8b7355", letterSpacing:".15em",
+                                marginBottom:4 }}>
+                    {gDeck[gIdx].topic.toUpperCase()}
+                  </div>
+                  <div style={{ width:32, height:1, background:"#ddd5c0", marginBottom:4 }} />
+                  {/* Pattern */}
+                  <div style={{ background:"#f5f0e8", borderRadius:10, padding:"8px 14px",
+                                fontFamily:"'Crimson Pro',serif", fontSize:14,
+                                color:"#5a4a30", lineHeight:1.6, whiteSpace:"pre-line" }}>
+                    {gDeck[gIdx].pattern}
+                  </div>
+                  {/* Chinese sentences */}
+                  <div style={{ fontFamily:"'Noto Serif SC'", fontSize:20,
+                                color:"#1a2410", lineHeight:2, whiteSpace:"pre-line",
+                                textAlign:"left", width:"100%" }}>
+                    {gDeck[gIdx].front}
+                  </div>
+                  <div style={{ fontSize:11, color:"#c8b898", letterSpacing:".15em",
+                                fontFamily:"'Crimson Pro',serif", marginTop:4 }}>
+                    TAP TO SEE PINYIN →
+                  </div>
+                </>
+              ) : (
+                /* BACK — Pinyin + tip */
+                <>
+                  <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:600,
+                                fontSize:13, color:"#2d5a27", letterSpacing:".15em",
+                                marginBottom:4 }}>
+                    PINYIN
+                  </div>
+                  <div style={{ width:32, height:1, background:"#c8ddc4", marginBottom:4 }} />
+                  {/* Pinyin sentences */}
+                  <div style={{ fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                                fontSize:18, color:"#2d5a27", lineHeight:2,
+                                whiteSpace:"pre-line", textAlign:"left", width:"100%" }}>
+                    {gDeck[gIdx].back}
+                  </div>
+                  {/* Pro tip */}
+                  {gDeck[gIdx].tip !== "" && (
+                    <div style={{ background:"#e8f4e8", border:"1px solid #c8ddc4",
+                                  borderRadius:12, padding:"12px 14px", marginTop:8,
+                                  fontFamily:"'Crimson Pro',serif", fontSize:13,
+                                  color:"#2d3a1e", lineHeight:1.7, textAlign:"left",
+                                  width:"100%" }}>
+                      <span style={{ fontWeight:600, color:"#2d5a27" }}>💡 Pro Tip: </span>
+                      {gDeck[gIdx].tip}
+                    </div>
+                  )}
+                  <div style={{ fontSize:11, color:"#2d5a27", letterSpacing:".15em",
+                                fontFamily:"'Crimson Pro',serif", marginTop:4 }}>
+                    ← TAP TO SEE CHINESE
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Navigation */}
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
+              <button className="btn-outline" onClick={gPrev}
+                      disabled={gIdx === 0}
+                      style={{ opacity: gIdx===0 ? .3 : 1, fontSize:14, padding:"12px" }}>
+                ← Prev
+              </button>
+              <button onClick={() => { setGFlipped(f => !f); }}
+                      style={{ border:"1px solid #ddd5c0", background:"#fff",
+                               borderRadius:10, padding:"12px", cursor:"pointer",
+                               fontFamily:"'Crimson Pro',serif", fontSize:14, color:"#5a4a30",
+                               transition:"all .2s" }}>
+                {gFlipped ? "See 汉字" : "See Pīnyīn"}
+              </button>
+              <button className="btn-green" onClick={gNext}
+                      style={{ fontSize:14, padding:"12px" }}>
+                {gIdx + 1 === gDeck.length ? "Finish" : "Next →"}
+              </button>
+            </div>
+
+            <div style={{ display:"flex", justifyContent:"center", marginTop:12 }}>
+              <button onClick={() => setScreen("gdone")}
+                      style={{ background:"none", border:"none", color:"#c8b898",
+                               fontFamily:"'Crimson Pro',serif", fontSize:13, cursor:"pointer" }}>
+                ⏹ Stop
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ══ GRAMMAR DONE ══ */}
+        {screen === "gdone" && (
+          <div className="fade-up" style={{ width:"100%", maxWidth:460, position:"relative",
+                                            zIndex:1, textAlign:"center", paddingSelTop:28 }}>
+            <div style={{ fontSize:44, marginBottom:8 }}>📖</div>
+            <div style={{ fontFamily:"'Noto Serif SC'", fontSize:22, color:"#2d3a1e", marginBottom:4 }}>
+              复习完成
+            </div>
+            <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:14,
+                          color:"#8b7355", marginBottom:28 }}>
+              Grammar Review Complete · {gDeck.length} cards reviewed
+            </div>
+
+            <div style={{ background:"#f0f7ef", border:"1px solid #c8ddc4", borderRadius:20,
+                          padding:20, marginBottom:24, fontFamily:"'Crimson Pro',serif" }}>
+              <div style={{ fontSize:13, color:"#2d5a27", marginBottom:4 }}>
+                Keep reviewing regularly to internalize the patterns.
+              </div>
+              <div style={{ fontSize:12, color:"#8b7355", fontStyle:"italic" }}>
+                每天复习一点，长期记住。
+              </div>
+              <div style={{ fontSize:11, color:"#8b7355", fontStyle:"italic" }}>
+                Review a little every day, remember for a long time.
+              </div>
+            </div>
+
+            <button className="btn-green" style={{ width:"100%", marginBottom:10 }}
+                    onClick={startGrammar}>再来一次 · Review Again</button>
+            <button className="btn-outline" style={{ width:"100%", marginBottom:8 }}
+                    onClick={() => setScreen("gselect")}>Change Lessons</button>
+            <button className="btn-outline" style={{ width:"100%" }}
+                    onClick={() => setScreen("home")}>← Home</button>
+          </div>
+        )}
+
     </div>
   );
 }
