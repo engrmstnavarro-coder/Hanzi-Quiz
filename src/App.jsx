@@ -603,6 +603,7 @@ export default function HanziQuiz() {
   const [selTo, setSelTo]         = useState(null);
   const [statsTab, setStatsTab]   = useState("list");
   const [showStopConfirm, setShowStopConfirm] = useState(false);
+  const [pMode, setPMode]         = useState("hanzi"); // hanzi | pinyin
 
   // ── Grammar state ────────────────────────────────────────────────────────
   const [gDeck, setGDeck]         = useState([]);
@@ -648,8 +649,9 @@ export default function HanziQuiz() {
     return "";
   }
 
-  function startQuiz() {
+  function startQuiz(mode) {
     if (selectedVocab.length === 0) return;
+    if (mode) setPMode(mode);
     setDeck(shuffle(selectedVocab));
     setIdx(0); setLevel(0); setSRight(0); setSWrong(0);
     setWrongThisCard(false); setConfirming(false);
@@ -676,20 +678,38 @@ export default function HanziQuiz() {
     setWrongThisCard(true);
     setSWrong(w => w + 1);
     setStats(s => {
-      const p = s[hanzi] || { wrong:0, seen:0, wrongCards:[] };
-      return { ...s, [hanzi]: { ...p, wrong: p.wrong + 1,
-        wrongCards: [...(p.wrongCards || []), Date.now()].slice(-20) } };
+      const p = s[hanzi] || { wrong:0, seen:0, wrongCards:[], pWrong:0 };
+      return { ...s, [hanzi]: {
+        ...p,
+        wrong: pMode === "hanzi" ? p.wrong + 1 : p.wrong,
+        pWrong: pMode === "pinyin" ? (p.pWrong || 0) + 1 : (p.pWrong || 0),
+        wrongCards: [...(p.wrongCards || []), Date.now()].slice(-20),
+      }};
     });
   }
 
   function handleRight() {
-    if (level === 0) {
-      recordSeen(card.hanzi);
-      setSRight(r => r + 1);
-      setConfirming(true);
+    if (pMode === "pinyin") {
+      // Pinyin mode: "Check" at level 0 shows english + hanzi confirmation
+      // "Next" at level 1 (english already revealed) just moves on — no extra credit
+      if (level === 0) {
+        recordSeen(card.hanzi);
+        setSRight(r => r + 1);
+        setConfirming(true);
+      } else {
+        recordSeen(card.hanzi);
+        goNextCard();
+      }
     } else {
-      recordSeen(card.hanzi);
-      goNextCard();
+      // Hanzi mode
+      if (level === 0) {
+        recordSeen(card.hanzi);
+        setSRight(r => r + 1);
+        setConfirming(true);
+      } else {
+        recordSeen(card.hanzi);
+        goNextCard();
+      }
     }
   }
 
@@ -701,14 +721,26 @@ export default function HanziQuiz() {
   function handleWrong() {
     setShake(true);
     setTimeout(() => setShake(false), 450);
-    if (level === 0) {
-      recordWrongForCard(card.hanzi);
-      setLevel(1);
-    } else if (level === 1) {
-      setLevel(2);
+    if (pMode === "pinyin") {
+      // Pinyin mode: level 0 -> reveal english (level 1) -> move on
+      if (level === 0) {
+        recordWrongForCard(card.hanzi);
+        setLevel(1);
+      } else {
+        recordSeen(card.hanzi);
+        goNextCard();
+      }
     } else {
-      recordSeen(card.hanzi);
-      goNextCard();
+      // Hanzi mode: level 0 -> pinyin -> english -> move on
+      if (level === 0) {
+        recordWrongForCard(card.hanzi);
+        setLevel(1);
+      } else if (level === 1) {
+        setLevel(2);
+      } else {
+        recordSeen(card.hanzi);
+        goNextCard();
+      }
     }
   }
 
@@ -980,11 +1012,21 @@ export default function HanziQuiz() {
               </div>
             </div>
 
-            <button className="btn-green" style={{ width:"100%", fontSize:18,
-                                                    padding:"16px", marginBottom:10 }}
-                    onClick={() => setScreen("select")}>
-              开始练习 · Start Practice
-            </button>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
+              <button className="btn-green" style={{ fontSize:15, padding:"14px" }}
+                      onClick={() => { setPMode("hanzi"); setScreen("select"); }}>
+                <div style={{ fontSize:20, marginBottom:4 }}>汉字</div>
+                <div>Hanzi Practice</div>
+              </button>
+              <button style={{
+                background:"#1a3a5c", color:"#e8f0f8", border:"none", borderRadius:14,
+                fontSize:15, padding:"14px", cursor:"pointer", transition:"all .2s",
+                fontFamily:"'Crimson Pro',serif", fontWeight:600,
+              }} onClick={() => { setPMode("pinyin"); setScreen("select"); }}>
+                <div style={{ fontSize:20, marginBottom:4 }}>pīnyīn</div>
+                <div>Pinyin Practice</div>
+              </button>
+            </div>
             <button className="btn-outline" style={{ width:"100%" }}
                     onClick={() => setScreen("stats")}>
               查看统计 · View Stats
@@ -1002,6 +1044,16 @@ export default function HanziQuiz() {
               }}>← Back</button>
               <div style={{ fontFamily:"'Noto Serif SC'", fontSize:17,
                             fontWeight:600, color:"#2d3a1e" }}>Choose Lessons</div>
+              <span style={{
+                marginLeft:"auto",
+                background: pMode === "pinyin" ? "#e8f0f8" : "#f0f7ef",
+                border: `1px solid ${pMode === "pinyin" ? "#a8c0d8" : "#c8ddc4"}`,
+                borderRadius:999, padding:"3px 10px",
+                fontFamily:"'Crimson Pro',serif", fontSize:11,
+                color: pMode === "pinyin" ? "#1a3a5c" : "#2d5a27",
+              }}>
+                {pMode === "pinyin" ? "pīnyīn mode" : "汉字 mode"}
+              </span>
             </div>
 
             <div style={{ ...labelStyle, marginBottom:10 }}>PRACTICE MODE</div>
@@ -1089,7 +1141,7 @@ export default function HanziQuiz() {
 
             <button className="btn-green" style={{ width:"100%" }}
                     disabled={selectedVocab.length === 0}
-                    onClick={startQuiz}>
+                    onClick={() => startQuiz(pMode)}>
               {selectedVocab.length > 0
                 ? `开始 · Start ${selectedVocab.length} Words`
                 : "Select a lesson to continue"}
@@ -1145,12 +1197,21 @@ export default function HanziQuiz() {
                             width:`${progress}%`, transition:"width 0.5s ease" }} />
             </div>
 
-            <div style={{ textAlign:"center", marginBottom:8 }}>
+            {/* Mode badge */}
+            <div style={{ textAlign:"center", marginBottom:8, display:"flex",
+                          justifyContent:"center", gap:8 }}>
               <span style={{ background:"#f0f7ef", border:"1px solid #c8ddc4", borderRadius:999,
                              padding:"3px 12px", fontFamily:"'Crimson Pro',serif",
                              fontSize:12, color:"#2d5a27" }}>
                 Lesson {card.lesson}
               </span>
+              {pMode === "pinyin" && (
+                <span style={{ background:"#e8f0f8", border:"1px solid #a8c0d8", borderRadius:999,
+                               padding:"3px 12px", fontFamily:"'Crimson Pro',serif",
+                               fontSize:12, color:"#1a3a5c" }}>
+                  pīnyīn mode
+                </span>
+              )}
             </div>
 
             {/* Flashcard */}
@@ -1158,57 +1219,114 @@ export default function HanziQuiz() {
                  className={`pop-in ${shake ? "shake" : ""}`}
                  style={{
                    background: confirming ? "#f0f7ef" : "#fff",
-                   border: confirming ? "2px solid #2d5a27" : "1px solid #ddd5c0",
+                   border: confirming
+                     ? "2px solid #2d5a27"
+                     : pMode === "pinyin" ? "2px solid #1a3a5c" : "1px solid #ddd5c0",
                    borderRadius:24, boxShadow:"0 8px 40px #2d3a1e0d",
                    padding:"40px 24px", textAlign:"center", minHeight:230,
                    display:"flex", flexDirection:"column", alignItems:"center",
                    justifyContent:"center", gap:14, marginBottom:12,
                    transition:"background .25s, border .25s",
                  }}>
-              <div style={{
-                fontSize: card.hanzi.length > 4 ? 48 : card.hanzi.length > 2 ? 62 : 78,
-                lineHeight:1.1, color: confirming ? "#2d5a27" : "#1a2410",
-                textShadow:"0 2px 8px #2d3a1e12", transition:"color .25s",
-              }}>
-                {card.hanzi}
-              </div>
-              {(level >= 1 || confirming) && (
-                <div className="slide-down" style={{
-                  fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
-                  fontSize:24, color:"#2d5a27", letterSpacing:".04em",
-                }}>
-                  {card.pinyin}
-                </div>
+
+              {pMode === "hanzi" ? (
+                <>
+                  {/* HANZI MODE: show character, reveal pinyin then english */}
+                  <div style={{
+                    fontSize: card.hanzi.length > 4 ? 48 : card.hanzi.length > 2 ? 62 : 78,
+                    lineHeight:1.1, color: confirming ? "#2d5a27" : "#1a2410",
+                    textShadow:"0 2px 8px #2d3a1e12", transition:"color .25s",
+                  }}>
+                    {card.hanzi}
+                  </div>
+                  {/* Pinyin: show when wrong revealed pinyin (level>=1) OR confirming */}
+                  {(level >= 1 || confirming) && (
+                    <div className="slide-down" style={{
+                      fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                      fontSize:24, color:"#2d5a27", letterSpacing:".04em",
+                    }}>
+                      {card.pinyin}
+                    </div>
+                  )}
+                  {/* English: show when wrong revealed english (level>=2) OR confirming */}
+                  {(level >= 2 || confirming) && (
+                    <div className="slide-down" style={{
+                      fontFamily:"'Crimson Pro',serif", fontSize:18, color:"#5a4a30",
+                    }}>
+                      {card.english}
+                    </div>
+                  )}
+                  {!confirming && level > 0 && (
+                    <div style={{ fontSize:10, color:"#c8b898", letterSpacing:".15em",
+                                  fontFamily:"'Crimson Pro',serif" }}>
+                      {level === 1 ? "PINYIN REVEALED" : "ENGLISH REVEALED"}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* PINYIN MODE: show Pinyin, reveal English on wrong, then hanzi small */}
+                  <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11,
+                                color:"#a8c0d8", letterSpacing:".2em", marginBottom:4 }}>
+                    WHAT DOES THIS MEAN?
+                  </div>
+                  <div style={{
+                    fontFamily:"'Crimson Pro',serif", fontStyle:"italic",
+                    fontSize: card.pinyin.length > 18 ? 24 : 32,
+                    color:"#1a3a5c", letterSpacing:".04em", lineHeight:1.4,
+                  }}>
+                    {card.pinyin}
+                  </div>
+                  {(level >= 1 || confirming) && (
+                    <div className="slide-down" style={{
+                      fontFamily:"'Crimson Pro',serif", fontSize:22,
+                      color:"#5a4a30", fontWeight:600,
+                    }}>
+                      {card.english}
+                    </div>
+                  )}
+                  {confirming && (
+                    <div className="slide-down" style={{
+                      fontFamily:"'Noto Serif SC'", fontSize:28,
+                      color:"#8b7355", lineHeight:1.1,
+                    }}>
+                      {card.hanzi}
+                    </div>
+                  )}
+                  {!confirming && level > 0 && (
+                    <div style={{ fontSize:10, color:"#c8b898", letterSpacing:".15em",
+                                  fontFamily:"'Crimson Pro',serif" }}>
+                      ENGLISH REVEALED
+                    </div>
+                  )}
+                </>
               )}
-              {(level >= 2 || confirming) && (
-                <div className="slide-down" style={{
-                  fontFamily:"'Crimson Pro',serif", fontSize:18, color:"#5a4a30",
-                }}>
-                  {card.english}
-                </div>
-              )}
+
               {confirming && (
                 <div className="slide-down" style={{
                   fontSize:11, color:"#2d5a27", letterSpacing:".15em",
                   fontFamily:"'Crimson Pro',serif", fontWeight:600,
                 }}>
-                  &#10003; CORRECT - CHECK YOUR ANSWER
-                </div>
-              )}
-              {!confirming && level > 0 && (
-                <div style={{ fontSize:10, color:"#c8b898", letterSpacing:".15em",
-                              fontFamily:"'Crimson Pro',serif" }}>
-                  {level === 1 ? "PINYIN REVEALED" : "ENGLISH REVEALED"}
+                  {pMode === "pinyin" ? "✓ CORRECT - VERIFY BELOW" : "✓ CORRECT - CHECK YOUR ANSWER"}
                 </div>
               )}
             </div>
 
-            {!confirming && (stats[card.hanzi]?.wrong || 0) > 0 && (
+            {!confirming && (
+              (pMode === "hanzi" && (stats[card.hanzi]?.wrong || 0) > 0) ||
+              (pMode === "pinyin" && (stats[card.hanzi]?.pWrong || 0) > 0)
+            ) && (
               <div style={{ textAlign:"center", marginBottom:10 }}>
-                <span style={{ background:"#fdf0f0", border:"1px solid #e8c8c8",
-                               borderRadius:999, padding:"3px 12px", fontSize:12,
-                               color:"#8b2020", fontFamily:"'Crimson Pro',serif" }}>
-                  &#10007; Missed {stats[card.hanzi].wrong}x total
+                <span style={{
+                  background: pMode === "pinyin" ? "#eef3fa" : "#fdf0f0",
+                  border: `1px solid ${pMode === "pinyin" ? "#a8c0d8" : "#e8c8c8"}`,
+                  borderRadius:999, padding:"3px 12px", fontSize:12,
+                  color: pMode === "pinyin" ? "#1a3a5c" : "#8b2020",
+                  fontFamily:"'Crimson Pro',serif",
+                }}>
+                  &#10007; Missed {pMode === "pinyin"
+                    ? stats[card.hanzi].pWrong
+                    : stats[card.hanzi].wrong}x in {pMode} mode
                 </span>
               </div>
             )}
@@ -1221,10 +1339,14 @@ export default function HanziQuiz() {
             ) : (
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
                 <button className="btn-red" onClick={handleWrong}>
-                  {level === 0 ? "✗ Wrong" : level === 1 ? "✗ Still wrong" : "✗ Move on"}
+                  {pMode === "pinyin"
+                    ? (level === 0 ? "✗ Wrong" : "✗ Move on")
+                    : (level === 0 ? "✗ Wrong" : level === 1 ? "✗ Still wrong" : "✗ Move on")}
                 </button>
                 <button className="btn-green" onClick={handleRight}>
-                  {level === 0 ? "✓ Got it" : "Next →"}
+                  {level === 0
+                    ? (pMode === "pinyin" ? "✓ Check" : "✓ Got it")
+                    : "Next →"}
                 </button>
               </div>
             )}
@@ -1283,7 +1405,7 @@ export default function HanziQuiz() {
                             textAlign:"left" }}>
                 <div style={{ fontFamily:"'Crimson Pro',serif", fontSize:11,
                               color:"#8b2020", letterSpacing:".15em", marginBottom:10 }}>
-                  CHARACTERS TO REVIEW ({sWrong})
+                  {pMode === "pinyin" ? "PINYIN" : "CHARACTERS"} TO REVIEW ({sWrong})
                 </div>
                 <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
                   {deck
@@ -1302,7 +1424,7 @@ export default function HanziQuiz() {
             )}
 
             <button className="btn-green" style={{ width:"100%", marginBottom:10 }}
-                    onClick={startQuiz}>再来一次 · Practice Again</button>
+                    onClick={() => startQuiz(pMode)}>再来一次 · Practice Again</button>
             <button className="btn-outline" style={{ width:"100%", marginBottom:8 }}
                     onClick={() => setScreen("select")}>Change Lessons</button>
             <button className="btn-outline" style={{ width:"100%", marginBottom:8 }}
@@ -1379,7 +1501,13 @@ export default function HanziQuiz() {
                       </span>
                       {v.wrong > 0 && (
                         <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:600,
-                                      fontSize:13, color:"#8b2020" }}>&#10007; {v.wrong}</div>
+                                      fontSize:12, color:"#8b2020" }}>&#10007;H {v.wrong}</div>
+                      )}
+                      {(stats[v.hanzi]?.pWrong || 0) > 0 && (
+                        <div style={{ fontFamily:"'Crimson Pro',serif", fontWeight:600,
+                                      fontSize:12, color:"#1a3a5c" }}>
+                          &#10007;P {stats[v.hanzi].pWrong}
+                        </div>
                       )}
                       <div style={{ fontSize:9, color:"#c8b898",
                                     fontFamily:"'Crimson Pro',serif",
