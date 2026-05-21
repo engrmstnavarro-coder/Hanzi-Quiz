@@ -718,6 +718,24 @@ export default function HanziQuiz() {
     goNextCard();
   }
 
+  function handleConfirmWrong() {
+    // User checked the answer and realized they were actually wrong
+    // Undo the correct count, add a wrong count instead
+    setSRight(r => r - 1);
+    setSWrong(w => w + 1);
+    setStats(s => {
+      const p = s[card.hanzi] || { wrong:0, seen:0, wrongCards:[], pWrong:0 };
+      return { ...s, [card.hanzi]: {
+        ...p,
+        wrong: pMode === "hanzi" ? p.wrong + 1 : p.wrong,
+        pWrong: pMode === "pinyin" ? (p.pWrong || 0) + 1 : (p.pWrong || 0),
+        wrongCards: [...(p.wrongCards || []), Date.now()].slice(-20),
+      }};
+    });
+    setConfirming(false);
+    goNextCard();
+  }
+
   function handleWrong() {
     setShake(true);
     setTimeout(() => setShake(false), 450);
@@ -1332,10 +1350,15 @@ export default function HanziQuiz() {
             )}
 
             {confirming ? (
-              <button className="btn-green" style={{ width:"100%", fontSize:19, padding:"18px" }}
-                      onClick={handleConfirmNext}>
-                Next &#8594; 下一个
-              </button>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                <button className="btn-red" onClick={handleConfirmWrong}>
+                  ✗ Actually Wrong
+                </button>
+                <button className="btn-green" style={{ fontSize:16 }}
+                        onClick={handleConfirmNext}>
+                  ✓ Next &#8594;
+                </button>
+              </div>
             ) : (
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
                 <button className="btn-red" onClick={handleWrong}>
