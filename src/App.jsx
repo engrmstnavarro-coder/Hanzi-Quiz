@@ -660,6 +660,7 @@ export default function HanziQuiz() {
   const [animKey, setAnimKey]     = useState(0);
   const [shake, setShake]         = useState(false);
   const [wrongThisCard, setWrongThisCard] = useState(false);
+  const [sessionWrongDeck, setSessionWrongDeck] = useState([]); // cards missed this session
   const [confirming, setConfirming]       = useState(false);
   const [selMode, setSelMode]     = useState("all");
   const [selSingle, setSelSingle] = useState(null);
@@ -719,6 +720,17 @@ export default function HanziQuiz() {
     setDeck(shuffle(selectedVocab));
     setIdx(0); setLevel(0); setSRight(0); setSWrong(0);
     setWrongThisCard(false); setConfirming(false);
+    setSessionWrongDeck([]);
+    setAnimKey(k => k + 1); setShowStopConfirm(false);
+    setScreen("quiz");
+  }
+
+  function startWrongReview() {
+    if (sessionWrongDeck.length === 0) return;
+    setDeck(shuffle(sessionWrongDeck));
+    setIdx(0); setLevel(0); setSRight(0); setSWrong(0);
+    setWrongThisCard(false); setConfirming(false);
+    setSessionWrongDeck([]); // reset so new wrongs from this review are tracked fresh
     setAnimKey(k => k + 1); setShowStopConfirm(false);
     setScreen("quiz");
   }
@@ -741,6 +753,13 @@ export default function HanziQuiz() {
     if (wrongThisCard) return;
     setWrongThisCard(true);
     setSWrong(w => w + 1);
+    // Track this card for session wrong review
+    const wrongCard = deck[idx];
+    if (wrongCard) {
+      setSessionWrongDeck(prev =>
+        prev.find(c => c.hanzi === wrongCard.hanzi) ? prev : [...prev, wrongCard]
+      );
+    }
     setStats(s => {
       const p = s[hanzi] || { wrong:0, seen:0, wrongCards:[], pWrong:0 };
       return { ...s, [hanzi]: {
@@ -787,6 +806,13 @@ export default function HanziQuiz() {
     // Undo the correct count, add a wrong count instead
     setSRight(r => r - 1);
     setSWrong(w => w + 1);
+    // Also add to session wrong deck
+    const wrongCard = deck[idx];
+    if (wrongCard) {
+      setSessionWrongDeck(prev =>
+        prev.find(c => c.hanzi === wrongCard.hanzi) ? prev : [...prev, wrongCard]
+      );
+    }
     setStats(s => {
       const p = s[card.hanzi] || { wrong:0, seen:0, wrongCards:[], pWrong:0 };
       return { ...s, [card.hanzi]: {
@@ -1508,6 +1534,18 @@ export default function HanziQuiz() {
                   ))}
                 </div>
               </div>
+            )}
+
+            {/* Review Wrong Answers — only shows when there are wrongs and accuracy < 100% */}
+            {sWrong > 0 && accuracy < 100 && (
+              <button onClick={startWrongReview} style={{
+                width:"100%", marginBottom:10, border:"2px solid #8b2020",
+                background:"#fdf0f0", color:"#8b2020", borderRadius:14,
+                padding:"16px", fontFamily:"'Crimson Pro',serif",
+                fontSize:17, fontWeight:600, cursor:"pointer", transition:"all .2s",
+              }}>
+                &#9654; Review {sessionWrongDeck.length} Wrong Answer{sessionWrongDeck.length !== 1 ? "s" : ""} Again
+              </button>
             )}
 
             <button className="btn-green" style={{ width:"100%", marginBottom:10 }}
