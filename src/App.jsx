@@ -1385,6 +1385,14 @@ export default function HanziQuiz() {
                   }}>
                     {card.pinyin}
                   </div>
+                  {/* Hanzi always visible below pinyin so you know exact character */}
+                  <div style={{
+                    fontFamily:"'Noto Serif SC'",
+                    fontSize: card.hanzi.length > 4 ? 28 : 36,
+                    color:"#8b7355", lineHeight:1.1, opacity:0.7,
+                  }}>
+                    {card.hanzi}
+                  </div>
                   {(level >= 1 || confirming) && (
                     <div className="slide-down" style={{
                       fontFamily:"'Crimson Pro',serif", fontSize:22,
